@@ -12,41 +12,6 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const burgerMenu = document.querySelector('.burger-menu');
-    const mainNav = document.querySelector('.main-nav');
-    const menuOverlay = document.querySelector('.menu-overlay');
-    
-    if (burgerMenu && mainNav && menuOverlay) {
-      burgerMenu.addEventListener('click', () => {
-        mainNav.classList.toggle('active');
-        burgerMenu.classList.toggle('active');
-        menuOverlay.classList.toggle('active');
-      });
-  
-      menuOverlay.addEventListener('click', () => {
-        mainNav.classList.remove('active');
-        burgerMenu.classList.remove('active');
-        menuOverlay.classList.remove('active');
-      });
-  
-      document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-          mainNav.classList.remove('active');
-          burgerMenu.classList.remove('active');
-          menuOverlay.classList.remove('active');
-        });
-      });
-  
-      window.addEventListener('resize', () => {
-        if (window.innerWidth > 992) {
-          mainNav.classList.remove('active');
-          burgerMenu.classList.remove('active');
-          menuOverlay.classList.remove('active');
-        }
-      });
-    }
-});
 
 document.addEventListener('DOMContentLoaded', function() {
     const cardNumber = document.getElementById('card-number');
