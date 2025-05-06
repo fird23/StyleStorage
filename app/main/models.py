@@ -31,12 +31,18 @@ class Product(models.Model):
         ('wardrobe', 'Шкафы-купе'),
         ('closet', 'Гардеробные системы'),
     ]
+
+    MATERIAL_CHOICES = [
+        ('ДСП', 'ДСП'),
+        ('МДФ', 'МДФ'),
+        ('Натуральное дерево', 'Натуральное дерево'),
+    ]
     
     name = models.CharField(max_length=200)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    material = models.CharField(max_length=100)
+    material = models.CharField(max_length=50, choices=MATERIAL_CHOICES)
     dimensions = models.CharField(max_length=50)
     image = models.ImageField(upload_to='products/')
     created_at = models.DateTimeField(auto_now_add=True)

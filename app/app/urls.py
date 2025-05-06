@@ -18,6 +18,9 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('delete_card/<int:card_id>/', views.delete_card, name='delete_card'),
     path('delete_address/<int:index>/', views.delete_address, name='delete_address'),
+    path('add-product/', views.add_product, name='add_product'),
+    path('delete_product/<int:product_id>/', views.delete_product, name='delete_product'),
+
 ]
 
 if settings.DEBUG:

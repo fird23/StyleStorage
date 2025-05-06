@@ -5,9 +5,22 @@ from django.http import HttpResponseForbidden
 from django.views import View
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def home(request):
     return render(request, "home.html")
+
+def add_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('catalog')
+    else:
+        form = ProductForm()
+    return render(request, 'add_product.html', {'form': form})
 
 class RegistrationView(View):
     def get(self, request):
@@ -143,7 +156,64 @@ def about(request):
 
 def catalog(request):
     products = Product.objects.all()
-    return render(request, 'catalog.html')
+
+    # Получение параметров фильтрации из GET-запроса
+    search_query = request.GET.get('search', '')
+    price_min = request.GET.get('price_min')
+    price_max = request.GET.get('price_max')
+    categories = request.GET.getlist('category')
+    materials = request.GET.getlist('material')
+
+    if search_query:
+        products = products.filter(name__icontains=search_query)
+    if price_min:
+        try:
+            price_min_val = float(price_min)
+            products = products.filter(price__gte=price_min_val)
+        except ValueError:
+            pass
+    if price_max:
+        try:
+            price_max_val = float(price_max)
+            products = products.filter(price__lte=price_max_val)
+        except ValueError:
+            pass
+    if categories:
+        products = products.filter(category__in=categories)
+    if materials:
+        products = products.filter(material__in=materials)
+
+    # Пагинация - 6 товаров на страницу
+    paginator = Paginator(products, 6)
+    page = request.GET.get('page')
+
+    try:
+        products_page = paginator.page(page)
+    except PageNotAnInteger:
+        products_page = paginator.page(1)
+    except EmptyPage:
+        products_page = paginator.page(paginator.num_pages)
+
+    context = {
+        'products': products_page,
+        'search_query': search_query,
+        'price_min': price_min,
+        'price_max': price_max,
+        'selected_categories': categories,
+        'selected_materials': materials,
+        'page_obj': products_page,
+        'paginator': paginator,
+    }
+    return render(request, 'catalog.html', context)
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_product(request, product_id):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, id=product_id)
+        product.delete()
+        return redirect('catalog')
+    else:
+        return HttpResponseForbidden("Метод не разрешен")
 
 def order(request):
     if request.method == 'POST':

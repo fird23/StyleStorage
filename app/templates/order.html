@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'styles/cart.css' %}">
+
+<div class="cart-container">
+    <h2>Ваша корзина</h2>
+        {% if cart.items.all %}
+            <div class="cart-items">
+                {% for item in cart.items.all %}
+                <div class="cart-item" data-product-id="{{ item.product.id }}">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                    <div class="item-details">
+                        <h3>{{ item.product.name }}</h3>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn minus">-</button>
+                            <span class="quantity">{{ item.quantity }}</span>
+                            <button class="quantity-btn plus">+</button>
+                        </div>
+                        <div class="price">{{ item.product.price }} ₽ x {{ item.quantity }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="cart-summary">
+                <h3>Итого: {{ total_price }} ₽</h3>
+                <button class="checkout-btn">Оформить заказ</button>
+            </div>
+        {% else %}
+            <p>Ваша корзина пуста</p>
+        {% endif %}
+    </div>
+    {% endblock %}

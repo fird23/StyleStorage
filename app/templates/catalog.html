@@ -11,88 +11,118 @@
             <!-- Блок фильтров -->
             <aside class="filters-section">
                 <h2 class="section-title">Фильтры</h2>
-                
-                <div class="filter-group">
-                    <h3 class="filter-title">Цена, ₽</h3>
-                    <div class="price-inputs">
-                        <input type="number" placeholder="От" min="0" class="price-input">
-                        <input type="number" placeholder="До" max="100000" class="price-input">
+                <form method="get" action="{% url 'catalog' %}">
+                    <div class="filter-group">
+                        <h3 class="filter-title">Поиск по названию</h3>
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Введите название" class="form-control">
                     </div>
-                    <div class="price-range"></div>
-                </div>
 
-                <div class="filter-group">
-                    <h3 class="filter-title">Тип изделия</h3>
-                    <div class="filter-options">
-                        <label class="filter-checkbox">
-                            <input type="checkbox" name="type" checked>
-                            <span>Шкаф-купе</span>
-                        </label>
-                        <label class="filter-checkbox">
-                            <input type="checkbox" name="type">
-                            <span>Гардеробные системы</span>
-                        </label>
+                    <div class="filter-group">
+                        <h3 class="filter-title">Цена, ₽</h3>
+                        <div class="price-inputs">
+                            <input type="number" name="price_min" value="{{ price_min }}" placeholder="От" min="0" class="price-input">
+                            <input type="number" name="price_max" value="{{ price_max }}" placeholder="До" max="100000" class="price-input">
+                        </div>
+                        <div class="price-range"></div>
                     </div>
-                </div>
 
-                <div class="filter-group">
-                    <h3 class="filter-title">Материал</h3>
-                    <div class="filter-options">
-                        <label class="filter-checkbox">
-                            <input type="checkbox" name="material">
-                            <span>ДСП</span>
-                        </label>
-                        <label class="filter-checkbox">
-                            <input type="checkbox" name="material">
-                            <span>МДФ</span>
-                        </label>
-                        <label class="filter-checkbox">
-                            <input type="checkbox" name="material">
-                            <span>Натуральное дерево</span>
-                        </label>
+                    <div class="filter-group">
+                        <h3 class="filter-title">Тип изделия</h3>
+                        <div class="filter-options">
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="category" value="wardrobe" {% if 'wardrobe' in selected_categories %}checked{% endif %}>
+                                <span>Шкаф-купе</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="category" value="closet" {% if 'closet' in selected_categories %}checked{% endif %}>
+                                <span>Гардеробные системы</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
 
-                <button class="cta-btn primary-cta full-width">Применить фильтры</button>
+                    <div class="filter-group">
+                        <h3 class="filter-title">Материал</h3>
+                        <div class="filter-options">
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="material" value="ДСП" {% if 'ДСП' in selected_materials %}checked{% endif %}>
+                                <span>ДСП</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="material" value="МДФ" {% if 'МДФ' in selected_materials %}checked{% endif %}>
+                                <span>МДФ</span>
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="material" value="Натуральное дерево" {% if 'Натуральное дерево' in selected_materials %}checked{% endif %}>
+                                <span>Натуральное дерево</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="cta-btn primary-cta full-width">Применить фильтры</button>
+                </form>
             </aside>
 
             <!-- Сетка товаров -->
             <div class="products-section">
                 <div class="products-grid">
-                    <!-- Карточка товара 1 -->
+                    {% for product in products %}
                     <article class="product-card" itemscope itemtype="http://schema.org/Product">
                         <div class="product-image">
-                            <img src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-1.2.1&auto=format&fit=crop&w=1351&q=80" 
-                                 alt="Шкаф-купе Милан"
+                            <img src="{{ product.image.url }}" 
+                                 alt="{{ product.name }}"
                                  loading="lazy">
-                            <span class="product-badge">Хит продаж</span>
                         </div>
                         <div class="product-info">
-                            <h3 class="product-title" itemprop="name">Шкаф-купе "Милан"</h3>
-                            <p class="product-description" itemprop="description">Двухдверный шкаф с зеркальными панелями и подсветкой</p>
+                            <h3 class="product-title" itemprop="name">{{ product.name }}</h3>
+                            <p class="product-description" itemprop="description">{{ product.description }}</p>
+                            <p class="product-material">Материал: {{ product.material }}</p>
+                            <p class="product-category">Тип изделия: {{ product.get_category_display }}</p>
                             <div class="product-price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                                 <span itemprop="priceCurrency" content="RUB">₽</span>
-                                <span itemprop="price">34 900</span>
+                                <span itemprop="price">{{ product.price }}</span>
                             </div>
                             <div class="product-actions">
                                 <a href="#" class="btn-details">Подробнее</a>
                                 <button class="btn-cart">
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
+                                {% if user.is_staff %}
+                                <form method="post" action="{% url 'delete_product' product.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete">Удалить</button>
+                                </form>
+                                {% endif %}
                             </div>
                         </div>
                     </article>
+                    {% empty %}
+                    <p>Товары не найдены.</p>
+                    {% endfor %}
 
                     <!-- Остальные товары -->
                 </div>
 
                 <!-- Пагинация -->
                 <div class="pagination">
-                    <a href="#" class="page-link active">1</a>
-                    <a href="#" class="page-link">2</a>
-                    <a href="#" class="page-link">3</a>
-                    <span class="page-dots">...</span>
-                    <a href="#" class="page-link">10</a>
+                    {% if page_obj.has_previous %}
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ page_obj.previous_page_number }}" class="page-link">Назад</a>
+                    {% else %}
+                        <span class="page-link disabled">Назад</span>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <span class="page-link active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ num }}" class="page-link">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ page_obj.next_page_number }}" class="page-link">Вперед</a>
+                    {% else %}
+                        <span class="page-link disabled">Вперед</span>
+                    {% endif %}
                 </div>
             </div>
         </div>

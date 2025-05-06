@@ -22,17 +22,21 @@ class RegistrationForm(UserCreationForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['category', 'name', 'description', 'price', 'image']
+        fields = ['name', 'description', 'category', 'material', 'price', 'image']
         widgets = {
-            'category': forms.Select(attrs={
-                'class': 'form-control',
-                'style': 'padding: 0.8rem; border-radius: 5px;'
-            }),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={
                 'rows': 4,
                 'class': 'form-control',
-                'placeholder': 'Состав пиццы и описание...'
+                'placeholder': 'Описание изделия...'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-control',
+                'style': 'padding: 0.8rem; border-radius: 5px;'
+            }),
+            'material': forms.Select(attrs={
+                'class': 'form-control',
+                'style': 'padding: 0.8rem; border-radius: 5px;'
             }),
             'price': forms.NumberInput(attrs={
                 'class': 'form-control',
