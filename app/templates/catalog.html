@@ -20,8 +20,8 @@
                     <div class="filter-group">
                         <h3 class="filter-title">Цена, ₽</h3>
                         <div class="price-inputs">
-                            <input type="number" name="price_min" value="{{ price_min }}" placeholder="От" min="0" class="price-input">
-                            <input type="number" name="price_max" value="{{ price_max }}" placeholder="До" max="100000" class="price-input">
+                            <input type="number" name="price_min" value="{{ price_min|default_if_none:'' }}" placeholder="От" min="0" class="price-input">
+                            <input type="number" name="price_max" value="{{ price_max|default_if_none:'' }}" placeholder="До" max="100000" class="price-input">
                         </div>
                         <div class="price-range"></div>
                     </div>
@@ -74,7 +74,13 @@
                         </div>
                         <div class="product-info">
                             <h3 class="product-title" itemprop="name">{{ product.name }}</h3>
-                            <p class="product-description" itemprop="description">{{ product.description }}</p>
+                            <p class="product-description" itemprop="description">
+                                {% if product.description|length > 100 %}
+                                    {{ product.description|slice:":100" }}...
+                                {% else %}
+                                    {{ product.description }}
+                                {% endif %}
+                            </p>
                             <p class="product-material">Материал: {{ product.material }}</p>
                             <p class="product-category">Тип изделия: {{ product.get_category_display }}</p>
                             <div class="product-price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
@@ -82,8 +88,8 @@
                                 <span itemprop="price">{{ product.price }}</span>
                             </div>
                             <div class="product-actions">
-                                <a href="#" class="btn-details">Подробнее</a>
-                                <button class="btn-cart">
+                                <a href="#" class="details-btn" data-product-id="{{ product.id }}">Подробнее</a>
+                                <button class="btn-cart" title="Добавить в корзину" data-product-id="{{ product.id }}" type="button">
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
                                 {% if user.is_staff %}
@@ -101,9 +107,10 @@
 
                     <!-- Остальные товары -->
                 </div>
+            </div>
 
-                <!-- Пагинация -->
-                <div class="pagination">
+            <!-- Пагинация -->
+            <div class="pagination">
                     {% if page_obj.has_previous %}
                         <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ page_obj.previous_page_number }}" class="page-link">Назад</a>
                     {% else %}
@@ -125,6 +132,18 @@
                     {% endif %}
                 </div>
             </div>
+        </div>
+    </div>
+    <div id="productModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-product-name"></h2>
+            <img id="modal-product-image" src="" alt="" />
+            <p id="modal-product-description"></p>
+            <p><strong>Материал:</strong> <span id="modal-product-material"></span></p>
+            <p><strong>Тип изделия:</strong> <span id="modal-product-category"></span></p>
+            <p><strong>Размеры:</strong> <span id="modal-product-dimensions"></span></p>
+            <p><strong>Цена:</strong> <span id="modal-product-price"></span></p>
         </div>
     </div>
 </main>

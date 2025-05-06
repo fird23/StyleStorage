@@ -1,13 +1,18 @@
-from .models import Product, CustomUser, PaymentCard
+from .models import Cart, CartItem, Product, CustomUser, PaymentCard
 from .forms import RegistrationForm, AddCardForm, ProductForm, PaymentCardForm, UserProfileForm, AddressForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.views import View
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpResponse, Http404
+from django.template.loader import render_to_string
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
+from django.utils.decorators import method_decorator
 
 def home(request):
     return render(request, "home.html")
@@ -215,10 +220,102 @@ def delete_product(request, product_id):
     else:
         return HttpResponseForbidden("Метод не разрешен")
 
+from collections import Counter
+
+class CartContext:
+    def __init__(self, items, total_price):
+        self.items = items
+        self.total_price = total_price
+
+@require_POST
+def add_to_cart(request, product_id):
+    user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'User not authenticated'}, status=401)
+    product = get_object_or_404(Product, id=product_id)
+    cart, created = Cart.objects.get_or_create(user=user)
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    else:
+        cart_item.quantity = 1
+        cart_item.save()
+    return JsonResponse({'success': True, 'cart_count': sum(item.quantity for item in cart.items.all())})
+
 def order(request):
-    if request.method == 'POST':
-        pass
-    return render(request, 'order.html')
+    user = request.user
+    if not user.is_authenticated:
+        return redirect('login')
+    cart, created = Cart.objects.get_or_create(user=user)
+    items = []
+    total_price = 0
+    for item in cart.items.select_related('product').all():
+        items.append({
+            'product': item.product,
+            'quantity': item.quantity
+        })
+        total_price += item.product.price * item.quantity
+    cart_obj = CartContext(items, total_price)
+    return render(request, 'order.html', {'cart': cart_obj})
+
+
+
+@require_http_methods(["POST"])
+# Убрали csrf_exempt для проверки CSRF защиты
+def update_cart_item_quantity(request, product_id):
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"update_cart_item_quantity called with product_id={product_id} and POST data={request.POST}")
+    user = request.user
+    if not user.is_authenticated:
+        logger.warning("User not authenticated")
+        return JsonResponse({'success': False, 'error': 'User not authenticated'}, status=401)
+    try:
+        quantity = int(request.POST.get('quantity', 1))
+        if quantity < 1:
+            quantity = 1
+    except (ValueError, TypeError):
+        quantity = 1
+    cart = Cart.objects.filter(user=user).first()
+    if not cart:
+        logger.warning("Cart not found")
+        return JsonResponse({'success': False, 'error': 'Cart not found'}, status=404)
+    try:
+        cart_item = CartItem.objects.get(cart=cart, product_id=product_id)
+        cart_item.quantity = quantity
+        cart_item.save()
+    except CartItem.DoesNotExist:
+        logger.warning("Cart item not found")
+        return JsonResponse({'success': False, 'error': 'Cart item not found'}, status=404)
+    # Пересчёт общей суммы корзины
+    total_price = 0
+    for item in cart.items.select_related('product').all():
+        total_price += item.product.price * item.quantity
+    logger.info(f"Quantity updated successfully: {cart_item.quantity}, total_price={total_price}")
+    return JsonResponse({
+        'success': True,
+        'quantity': cart_item.quantity,
+        'item_total_price': cart_item.product.price * cart_item.quantity,
+        'total_price': total_price
+    })
+
+def product_modal(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        raise Http404("Товар не найден")
+    product_data = {
+        'id': product.id,
+        'name': product.name,
+        'description': product.description,
+        'price': str(product.price),
+        'material': product.material,
+        'category_display': product.get_category_display(),
+        'dimensions': product.dimensions,
+        'image_url': product.image.url if product.image else '',
+    }
+    return JsonResponse(product_data)
 
 def contacts(request):
     return render(request, 'contacts.html')

@@ -20,7 +20,8 @@ urlpatterns = [
     path('delete_address/<int:index>/', views.delete_address, name='delete_address'),
     path('add-product/', views.add_product, name='add_product'),
     path('delete_product/<int:product_id>/', views.delete_product, name='delete_product'),
-
+    path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('product/<int:product_id>/modal/', views.product_modal, name='product_modal'),
 ]
 
 if settings.DEBUG:

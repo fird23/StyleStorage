@@ -6,9 +6,9 @@
 
 <div class="cart-container">
     <h2>Ваша корзина</h2>
-        {% if cart.items.all %}
+        {% if cart.items %}
             <div class="cart-items">
-                {% for item in cart.items.all %}
+                {% for item in cart.items %}
                 <div class="cart-item" data-product-id="{{ item.product.id }}">
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                     <div class="item-details">
@@ -24,11 +24,11 @@
                 {% endfor %}
             </div>
             <div class="cart-summary">
-                <h3>Итого: {{ total_price }} ₽</h3>
+                <h3>Итого: {{ cart.total_price }} ₽</h3>
                 <button class="checkout-btn">Оформить заказ</button>
             </div>
         {% else %}
             <p>Ваша корзина пуста</p>
         {% endif %}
     </div>
-    {% endblock %}
+{% endblock %}

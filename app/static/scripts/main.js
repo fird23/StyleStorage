@@ -59,20 +59,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функции для модального окна редактирования профиля
     const modal = document.getElementById('editModal');
-    const modalContent = modal.querySelector('.modal-content');
+    let modalContent = null;
+    if (modal) {
+        modalContent = modal.querySelector('.modal-content');
 
-    window.openEditModal = function() {
-        modal.style.display = 'flex';
-    };
+        window.openEditModal = function() {
+            modal.style.display = 'flex';
+        };
 
-    window.closeEditModal = function() {
-        modal.style.display = 'none';
-    };
+        window.closeEditModal = function() {
+            modal.style.display = 'none';
+        };
 
-    // Закрытие модального окна при клике вне его содержимого
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeEditModal();
-        }
-    });
+        // Закрытие модального окна при клике вне его содержимого
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        });
+    }
 });
