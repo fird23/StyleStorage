@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'styles/profile.css' %}">
+
+<div class="profile-container container">
+    <div class="profile-header">
+        <h1>Ваш профиль</h1>
+        <button class="btn btn-primary" onclick="openEditModal()">Изменить данные</button>
+    </div>
+
+    <div class="profile-info">
+        <div class="info-card">
+            <h3>Основная информация</h3>
+            <p><strong>Имя:</strong> <span id="username">{{ user.username }}</span></p>
+            <p><strong>Email:</strong> <span id="email">{{ user.email }}</span></p>
+            <p><strong>Телефон:</strong> <span id="phone">{{ user.phone|default:"Не указан" }}</span></p>
+        </div>
+
+        <div class="info-card">
+            <h3>Платежные карты</h3>
+            <form class="card-form">
+                <div class="form-grid">
+                    <input type="text" placeholder="Номер карты" class="form-control" data-cleave="card">
+                    <input type="text" placeholder="ММ/ГГ" class="form-control" data-cleave="date">
+                    <input type="text" placeholder="CVV" class="form-control" data-cleave="cvv">
+                    <button class="btn btn-primary">Добавить карту</button>
+                </div>
+            </form>
+            <div class="cards-list">
+                <!-- Карты будут здесь -->
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>Адреса доставки</h3>
+            <form class="address-form">
+                <div class="form-grid">
+                    <input type="text" placeholder="Город" class="form-control">
+                    <input type="text" placeholder="Улица" class="form-control">
+                    <input type="text" placeholder="Дом" class="form-control">
+                    <input type="text" placeholder="Квартира" class="form-control">
+                    <button class="btn btn-primary">Добавить адрес</button>
+                </div>
+            </form>
+            <div class="address-list">
+                <!-- Адреса будут здесь -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Изменить данные</h2>
+        <form id="editForm">
+            <div class="form-group">
+                <label>Имя пользователя:</label>
+                <input type="text" class="form-control" value="{{ user.username }}">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" class="form-control" value="{{ user.email }}">
+            </div>
+            <div class="form-group">
+                <label>Телефон:</label>
+                <input type="tel" class="form-control phone-input" value="{{ user.phone }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditModal() {
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+</script>
+
+<style>
+.profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-form, .address-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    background: #2A4365;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cards-list, .address-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.card-item, .address-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.btn-delete {
+    background: #e53e3e;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,50 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // Форматирование для регистрации
+    const phoneInput = document.querySelector('.phone-input');
+    if (phoneInput) {
+        new Cleave(phoneInput, {
+            phone: true,
+            phoneRegionCode: 'RU',
+            prefix: '+7',
+            delimiter: ' ',
+            blocks: [2, 3, 3, 2, 2],
+            numericOnly: true,
+            onValueChanged: function(e) {
+                const raw = e.target.rawValue;
+                if (raw.startsWith('8')) {
+                    this.setRawValue('7' + raw.slice(1));
+                } else if (raw.startsWith('9')) {
+                    this.setRawValue('7' + raw);
+                }
+            }
+        });
+    }
+
+    // Форматирование для авторизации
+    const loginInput = document.getElementById('login-input');
+    if (loginInput) {
+        let cleave = null;
+        
+        loginInput.addEventListener('input', function(e) {
+            const value = e.target.value.replace(/\D/g, '');
+            
+            if (/^[789]/.test(value)) {
+                if (!cleave) {
+                    cleave = new Cleave(loginInput, {
+                        phone: true,
+                        phoneRegionCode: 'RU',
+                        prefix: '+7',
+                        delimiter: ' ',
+                        blocks: [2, 3, 3, 2, 2],
+                        numericOnly: true
+                    });
+                }
+            } else {
+                if (cleave) {
+                    cleave.destroy();
+                    cleave = null;
+                }
+            }
+        });
+    }
+});

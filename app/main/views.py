@@ -1,36 +1,64 @@
-from django.shortcuts import render
-from .models import Product
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from .forms import CustomUserCreationForm, LoginForm
+from .models import Product, CustomUser
+from django.contrib.auth import login, authenticate, logout
+from .forms import RegistrationForm, AddCardForm, ProductForm
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def home(request):
     return render(request, "home.html")
 
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+class RegistrationView(View):
+    def get(self, request):
+        form = RegistrationForm()
+        return render(request, 'register.html', {'form': form})
+
+    def post(self, request):
+        form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('profile')
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'register.html', {'form': form})
+        return render(request, 'register.html', {'form': form})
 
-def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            user = authenticate(request, email=email, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('profile')
-    else:
-        form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+class CustomLoginView(View):
+    def get(self, request):
+        return render(request, 'login.html')
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Нормализация номера
+        if any(c.isdigit() for c in username):
+            digits = ''.join(filter(str.isdigit, username))
+            if digits.startswith('8'):
+                digits = '7' + digits[1:]
+            if digits.startswith('9'):
+                digits = '7' + digits
+            username = f'+7{digits[1:11]}'
+
+        user = authenticate(username=username, password=password)
+        
+        if user:
+            login(request, user)
+            return redirect('profile')
+            
+        return render(request, 'login.html', {'error': 'Неверные данные'})
+
+
+
+class ProfileView(LoginRequiredMixin, View):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
+
+    def get(self, request):
+        form = AddCardForm()
+        return render(request, 'profile.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect("home")
 
 def about(request):
     return render(request, 'about.html')

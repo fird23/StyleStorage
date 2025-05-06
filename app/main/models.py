@@ -1,14 +1,30 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+import json
 
 class CustomUser(AbstractUser):
-    name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.JSONField(default=dict, blank=True)
+    bonus_points = models.IntegerField(default=0)
     
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'phone']
+    def save(self, *args, **kwargs):
+        if self.phone:
+            # Нормализация номера
+            digits = ''.join(filter(str.isdigit, self.phone))
+            if digits.startswith('8'):
+                digits = '7' + digits[1:]
+            if digits.startswith('9'):
+                digits = '7' + digits
+            self.phone = f'+7{digits[1:11]}'  # Всегда 11 цифр
+        super().save(*args, **kwargs)
+    
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if phone:
+            return '+' + ''.join(filter(str.isdigit, phone))[1:11]
+        return phone
 
 class Product(models.Model):
     CATEGORY_CHOICES = [
@@ -35,7 +51,7 @@ class Order(models.Model):
         ('completed', 'Завершен'),
     ]
     
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     products = models.ManyToManyField(Product)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')

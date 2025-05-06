@@ -1,42 +1,26 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
-
-{% block title %}Вход - StyleStorage{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'styles/reg.css' %}">
 
-<main>
-    <div class="auth-container">
-        <h1 class="auth-title">Вход в аккаунт</h1>
-        
-        <form method="post" class="auth-form">
-            {% csrf_token %}
-            
-            {% if form.errors %}
-                <div class="errorlist">
-                    Неверный email или пароль
-                </div>
-            {% endif %}
-
-            <div class="form-group">
-                <label for="id_email">Email</label>
-                <input type="email" name="email" id="id_email" required>
-            </div>
-
-            <div class="form-group">
-                <label for="id_password">Пароль</label>
-                <input type="password" name="password" id="id_password" required>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="auth-btn">Войти</button>
-            </div>
-        </form>
-
-        <div class="auth-links">
-            Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+<div class="form-container">
+    <h2>Вход</h2>
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post" class="form-reg">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Email или телефон:</label>
+            <input type="text" name="username" required class="form-control" id="login-input">
         </div>
-    </div>
-</main>
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" name="password" required class="form-control">
+        </div>
+        <button type="submit" class="btn-login">Войти</button>
+        <p class="auth-link">Нет аккаунта? <a href="{% url 'register' %}">Регистрация</a></p>
+    </form>
+</div>
 {% endblock %}

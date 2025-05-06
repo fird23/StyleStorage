@@ -27,10 +27,9 @@
                             <li><a href="{% url 'admin:index' %}" class="admin-btn">Админ-панель</a></li>
                         {% endif %}
                         <li>
-                            <form method="post" action="{% url 'logout' %}" class="logout-form">
-                                {% csrf_token %}
-                                <button type="submit" class="logout-btn">Выйти</button>
-                            </form>
+                            <a href="{% url 'logout' %}" class="nav-link">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
                         </li>
                     {% else %}
                         <li><a href="{% url 'register' %}" class="register-btn">Регистрация</a></li>
@@ -76,5 +75,8 @@
             </nav>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/addons/cleave-phone.ru.js"></script>
+    <script src="{% static 'scripts/reg.js' %}"></script>
 </body>
 </html>
