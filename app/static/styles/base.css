@@ -69,15 +69,53 @@ header {
     padding: 0.5rem 0;
 }
 
-.nav-list li a {
+.nav-list li a, .dropbtn {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     transition: all 0.3s ease;
+    cursor: pointer;
+    display: inline-block;
+    color: var(--text-color);
 }
 
-.nav-list li a:hover {
+.nav-list li a:hover, .dropbtn:hover {
     background: var(--light-color);
     color: var(--accent-color);
+}
+
+/* Контейнер для выпадающего контента */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: var(--shadow);
+    border-radius: 0.5rem;
+    z-index: 1000;
+    top: 100%;
+    left: 0;
+    list-style: none;
+}
+
+/* Стили для элементов выпадающего меню */
+.dropdown-content li {
+    padding: 0;
+}
+
+.dropdown-content li a {
+    padding: 0.5rem 1rem;
+    display: block;
+    color: var(--text-color);
+}
+
+.dropdown-content li a:hover {
+    background-color: var(--light-color);
+    color: var(--accent-color);
+}
+
+/* Показать выпадающее меню при наведении */
+.nav-list li.dropdown:hover > .dropdown-content {
+    display: block;
 }
 
 /* Кнопки */
@@ -290,4 +328,66 @@ footer {
     .cta-btn {
         width: 100%;
     }
+}
+
+/* Стили для выпадающего меню навигации */
+.nav-list {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    list-style: none;
+}
+
+.nav-list li {
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.nav-list li a, .dropbtn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: inline-block;
+    color: var(--text-color);
+}
+
+.nav-list li a:hover, .dropbtn:hover {
+    background: var(--light-color);
+    color: var(--accent-color);
+}
+
+/* Контейнер для выпадающего контента */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: var(--shadow);
+    border-radius: 0.5rem;
+    z-index: 1000;
+    top: 100%;
+    left: 0;
+    list-style: none;
+}
+
+/* Стили для элементов выпадающего меню */
+.dropdown-content li {
+    padding: 0;
+}
+
+.dropdown-content li a {
+    padding: 0.5rem 1rem;
+    display: block;
+    color: var(--text-color);
+}
+
+.dropdown-content li a:hover {
+    background-color: var(--light-color);
+    color: var(--accent-color);
+}
+
+/* Показать выпадающее меню при наведении */
+.nav-list li.dropdown:hover > .dropdown-content {
+    display: block;
 }
