@@ -1,0 +1,201 @@
+/* Стили для страницы "О компании" */
+.about-hero {
+    padding: 8rem 0 4rem;
+    background: var(--light-color);
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.about-text {
+    padding-right: 2rem;
+}
+
+.about-image {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-color);
+    opacity: 0.9;
+}
+
+/* История компании */
+.history-section {
+    padding: 6rem 2rem;
+    background: white;
+}
+
+.timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 50px;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--light-color);
+    border-radius: 2px;
+}
+
+.timeline-item {
+    position: relative;
+    padding: 2rem 0 2rem 6rem;
+    margin-left: 2rem;
+}
+
+.timeline-year {
+    position: absolute;
+    left: -6rem;
+    top: 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+}
+
+.timeline-content {
+    background: var(--light-color);
+    padding: 2rem;
+    border-radius: 1rem;
+    position: relative;
+}
+
+.timeline-content::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 2rem;
+    width: 2rem;
+    height: 2rem;
+    background: var(--light-color);
+    transform: rotate(45deg);
+}
+
+/* Команда */
+.team-section {
+    padding: 6rem 2rem;
+    background: var(--light-color);
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.team-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+}
+
+.member-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1.5rem;
+    border: 4px solid var(--light-color);
+}
+
+.position {
+    color: var(--accent-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.experience {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+    }
+    
+    .about-text {
+        padding-right: 0;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 2rem auto 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .timeline::before {
+        left: 20px;
+    }
+    
+    .timeline-item {
+        padding-left: 4rem;
+        margin-left: 1rem;
+    }
+    
+    .timeline-year {
+        left: -4.5rem;
+        font-size: 1.2rem;
+        padding: 0.3rem 0.8rem;
+    }
+    
+    .timeline-content::before {
+        display: none;
+    }
+}

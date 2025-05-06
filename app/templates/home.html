@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}StyleStorage{% endblock %}
+
+{% block content %}
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Индивидуальные гардеробные решения для вашего дома</h1>
+                <p class="hero-text">Создаем идеальные системы хранения с 2010 года. Более 5000 реализованных проектов по всей России</p>
+                <div class="cta-buttons">
+                    <a href="#catalog" class="cta-btn primary-cta">Выбрать шкаф</a>
+                    <a href="#designer" class="cta-btn secondary-cta">Вызвать замерщика</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <img src="https://www.svgrepo.com/show/361729/guarantee.svg" alt="Гарантия" class="feature-icon">
+                    <h3 class="feature-title">10 лет гарантии</h3>
+                    <p>На все изделия и фурнитуру</p>
+                </div>
+                <div class="feature-card">
+                    <img src="https://www.svgrepo.com/show/361476/ruler.svg" alt="Индивидуальный подход" class="feature-icon">
+                    <h3 class="feature-title">Индивидуальный подход</h3>
+                    <p>Точный расчет под ваши размеры</p>
+                </div>
+                <div class="feature-card">
+                    <img src="https://www.svgrepo.com/show/361674/eco.svg" alt="Экологичность" class="feature-icon">
+                    <h3 class="feature-title">Экологичные материалы</h3>
+                    <p>Безопасность для вашей семьи</p>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}

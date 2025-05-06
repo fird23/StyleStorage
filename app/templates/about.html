@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}О компании - StyleStorage{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'styles/about.css' %}">
+
+<main>
+    <!-- Секция "О компании" -->
+    <section class="about-hero">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h1 class="hero-title">13 лет создаём идеальные пространства</h1>
+                    <p class="hero-text">С 2010 года мы превратили более 5000 квартир и домов в образцы эргономики и стиля</p>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">5000+</div>
+                            <div class="stat-label">проектов</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">рекомендаций</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
+                         alt="Наше производство"
+                         loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- История компании -->
+    <section class="history-section">
+        <div class="container">
+            <h2 class="section-title">Наша история</h2>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2010</div>
+                    <div class="timeline-content">
+                        <h3>Основание компании</h3>
+                        <p>Первая мастерская в Москве, 3 сотрудника, первые заказы</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">2014</div>
+                    <div class="timeline-content">
+                        <h3>Собственное производство</h3>
+                        <p>Запуск цеха площадью 1000 м² с современным оборудованием</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">2020</div>
+                    <div class="timeline-content">
+                        <h3>Лидер рынка</h3>
+                        <p>Вошли в ТОП-5 производителей по версии "Мебельный Олимп"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Команда -->
+    <section class="team-section">
+        <div class="container">
+            <h2 class="section-title">Наша команда</h2>
+            
+            <div class="team-grid">
+                <div class="team-card">
+                    <img src="https://randomuser.me/api/portraits/men/75.jpg" 
+                         alt="Алексей Петров" 
+                         class="member-photo"
+                         loading="lazy">
+                    <h3>Алексей Петров</h3>
+                    <p class="position">Главный дизайнер</p>
+                    <p class="experience">12 лет опыта</p>
+                </div>
+                
+                <div class="team-card">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" 
+                         alt="Мария Иванова" 
+                         class="member-photo"
+                         loading="lazy">
+                    <h3>Мария Иванова</h3>
+                    <p class="position">Технический директор</p>
+                    <p class="experience">Основатель компании</p>
+                </div>
+                
+                <div class="team-card">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" 
+                         alt="Иван Сидоров" 
+                         class="member-photo"
+                         loading="lazy">
+                    <h3>Иван Сидоров</h3>
+                    <p class="position">Менеджер проектов</p>
+                    <p class="experience">7 лет с нами</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
