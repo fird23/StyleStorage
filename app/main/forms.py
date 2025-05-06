@@ -1,9 +1,7 @@
 from django import forms
-from .models import Order
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from .models import CustomUser, Product, Order, PaymentCard
 from django.contrib.auth import get_user_model
-from .models import CustomUser, Product
+from django.contrib.auth.forms import UserCreationForm
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -58,3 +56,42 @@ class OrderForm(forms.ModelForm):
                 'rows': 4
             }),
         }
+
+class PaymentCardForm(forms.ModelForm):
+    class Meta:
+        model = PaymentCard
+        fields = ['card_number', 'expiry_date']
+        widgets = {
+            'card_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Номер карты',
+                'maxlength': 19,
+            }),
+            'expiry_date': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'ММ/ГГ',
+                'maxlength': 5,
+            }),
+        }
+
+class UserProfileForm(forms.ModelForm):
+    password = forms.CharField(required=False, widget=forms.PasswordInput, label='Пароль')
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'phone', 'password']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
+
+class AddressForm(forms.Form):
+    city = forms.CharField(max_length=100, required=True, label='Город')
+    street = forms.CharField(max_length=100, required=True, label='Улица')
+    house = forms.CharField(max_length=20, required=True, label='Дом')
+    apartment = forms.CharField(max_length=20, required=False, label='Квартира')

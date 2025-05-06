@@ -19,122 +19,137 @@
         </div>
 
         <div class="info-card">
-            <h3>Платежные карты</h3>
-            <form class="card-form">
-                <div class="form-grid">
-                    <input type="text" placeholder="Номер карты" class="form-control" data-cleave="card">
-                    <input type="text" placeholder="ММ/ГГ" class="form-control" data-cleave="date">
-                    <input type="text" placeholder="CVV" class="form-control" data-cleave="cvv">
-                    <button class="btn btn-primary">Добавить карту</button>
+            <h3>Добавить карту</h3>
+            <form method="POST" id="card-form" class="card-form">
+              {% csrf_token %}
+              <input type="hidden" name="add_card" value="1">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="card-number">Номер карты</label>
+                  <input type="text" name="card_number" id="card-number" class="form-control"
+                         placeholder="XXXX XXXX XXXX XXXX" required
+                         value="{{ card_form.card_number.value|default_if_none:'' }}">
+                  {% if card_form.card_number.errors %}
+                    <div class="error">{{ card_form.card_number.errors }}</div>
+                  {% endif %}
                 </div>
+                
+                <div class="form-group">
+                  <label for="exp-date">Срок действия (MM/YY)</label>
+                  <input type="text" name="expiry_date" id="exp-date" class="form-control"
+                         placeholder="MM/YY" required
+                         value="{{ card_form.expiry_date.value|default_if_none:'' }}">
+                  {% if card_form.expiry_date.errors %} 
+                    <div class="error">{{ card_form.expiry_date.errors }}</div>
+                  {% endif %}
+                </div>
+                
+                <div class="form-group">
+                  <label for="cvv">CVV</label>
+                  <input type="text" name="cvv" id="cvv" class="form-control"
+                         placeholder="CVV" required
+                         value="{{ card_form.cvv.value|default_if_none:'' }}">
+                  {% if card_form.cvv.errors %}
+                    <div class="error">{{ card_form.cvv.errors }}</div>
+                  {% endif %}
+                </div>
+                <div>
+                  <button type="submit" class="btn btn-primary">Добавить карту</button>
+                </div>
+              </div>
             </form>
-            <div class="cards-list">
-                <!-- Карты будут здесь -->
+          
+            {% if card_form.errors %}
+            <div class="form-errors">
+                {% for field, errors in card_form.errors.items %}
+                    {% for error in errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
             </div>
-        </div>
-
+            {% endif %}
+        
+            <h3>Мои карты</h3>
+            <ul class="cards-list">
+                {% for card in cards %}
+                  <li class="card-item">
+                    {{ card.formatted_number }}
+                    <form method="POST" action="{% url 'delete_card' card.id %}" class="delete-form" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete">Удалить</button>
+                    </form>
+                  </li>
+                {% empty %}
+                    <li class="no-cards">У вас нет добавленных карт.</li>
+                {% endfor %}
+            </ul>
+          </div>
+        
         <div class="info-card">
             <h3>Адреса доставки</h3>
-            <form class="address-form">
+            <form class="address-form" method="POST" action="{% url 'profile' %}">
+                {% csrf_token %}
+                <input type="hidden" name="add_address" value="1">
                 <div class="form-grid">
-                    <input type="text" placeholder="Город" class="form-control">
-                    <input type="text" placeholder="Улица" class="form-control">
-                    <input type="text" placeholder="Дом" class="form-control">
-                    <input type="text" placeholder="Квартира" class="form-control">
-                    <button class="btn btn-primary">Добавить адрес</button>
+                    <input type="text" name="city" placeholder="Город" class="form-control" value="{{ address_form.city.value|default_if_none:'' }}">
+                    <input type="text" name="street" placeholder="Улица" class="form-control" value="{{ address_form.street.value|default_if_none:'' }}">
+                    <input type="text" name="house" placeholder="Дом" class="form-control" value="{{ address_form.house.value|default_if_none:'' }}">
+                    <input type="text" name="apartment" placeholder="Квартира" class="form-control" value="{{ address_form.apartment.value|default_if_none:'' }}">
+                    <button type="submit" class="btn btn-primary">Добавить адрес</button>
                 </div>
+                {% if address_form.errors %}
+                <div class="form-errors">
+                    {% for field, errors in address_form.errors.items %}
+                        {% for error in errors %}
+                            <div class="error">{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
             </form>
-            <div class="address-list">
-                <!-- Адреса будут здесь -->
-            </div>
+            <h3>Мои адреса</h3>
+            <ul class="address-list cards-list">
+                {% for address in addresses %}
+                    <li class="card-item">
+                        <strong>Город:</strong> {{ address.city }} <strong>Улица:</strong> {{ address.street }} <strong>Дом:</strong> {{ address.house }}{% if address.apartment %} <strong>Квартира:</strong> {{ address.apartment }}{% endif %}
+                        <form method="POST" action="{% url 'delete_address' forloop.counter0 %}" class="delete-form" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-delete">Удалить</button>
+                        </form>
+                    </li>
+                {% empty %}
+                    <li class="no-cards">У вас нет добавленных адресов.</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </div>
 
-<div id="editModal" class="modal">
+<div id="editModal" class="modal" style="display:none;">
     <div class="modal-content">
         <span class="close" onclick="closeEditModal()">&times;</span>
         <h2>Изменить данные</h2>
-        <form id="editForm">
+        <form id="editForm" method="POST" action="{% url 'profile' %}">
+            {% csrf_token %}
+            <input type="hidden" name="save_profile" value="1">
             <div class="form-group">
-                <label>Имя пользователя:</label>
-                <input type="text" class="form-control" value="{{ user.username }}">
+                <label for="id_username">Имя пользователя:</label>
+                <input type="text" id="id_username" name="username" class="form-control" value="{{ user.username }}">
             </div>
             <div class="form-group">
-                <label>Email:</label>
-                <input type="email" class="form-control" value="{{ user.email }}">
+                <label for="id_email">Email:</label>
+                <input type="email" id="id_email" name="email" class="form-control" value="{{ user.email }}">
             </div>
             <div class="form-group">
-                <label>Телефон:</label>
-                <input type="tel" class="form-control phone-input" value="{{ user.phone }}">
+                <label for="id_phone">Телефон:</label>
+                <input type="tel" id="id_phone" name="phone" class="form-control phone-input" value="{{ user.phone }}">
+            </div>
+            <div class="form-group">
+                <label for="id_password">Пароль:</label>
+                <input type="password" id="id_password" name="password" class="form-control" placeholder="Введите новый пароль">
             </div>
             <button type="submit" class="btn btn-primary">Сохранить</button>
         </form>
     </div>
 </div>
-
-<script>
-function openEditModal() {
-    document.getElementById('editModal').style.display = 'flex';
-}
-
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
-</script>
-
-<style>
-.profile-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-}
-
-.section {
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.card-form, .address-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.btn {
-    padding: 0.8rem 1.5rem;
-    background: #2A4365;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.cards-list, .address-list {
-    display: grid;
-    gap: 1rem;
-}
-
-.card-item, .address-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.btn-delete {
-    background: #e53e3e;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-</style>
 {% endblock %}

@@ -12,3 +12,102 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const burgerMenu = document.querySelector('.burger-menu');
+    const mainNav = document.querySelector('.main-nav');
+    const menuOverlay = document.querySelector('.menu-overlay');
+    
+    if (burgerMenu && mainNav && menuOverlay) {
+      burgerMenu.addEventListener('click', () => {
+        mainNav.classList.toggle('active');
+        burgerMenu.classList.toggle('active');
+        menuOverlay.classList.toggle('active');
+      });
+  
+      menuOverlay.addEventListener('click', () => {
+        mainNav.classList.remove('active');
+        burgerMenu.classList.remove('active');
+        menuOverlay.classList.remove('active');
+      });
+  
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          mainNav.classList.remove('active');
+          burgerMenu.classList.remove('active');
+          menuOverlay.classList.remove('active');
+        });
+      });
+  
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 992) {
+          mainNav.classList.remove('active');
+          burgerMenu.classList.remove('active');
+          menuOverlay.classList.remove('active');
+        }
+      });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const cardNumber = document.getElementById('card-number');
+    const expDate = document.getElementById('exp-date');
+    const cvv = document.getElementById('cvv');
+  
+    if (cardNumber) {
+      cardNumber.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.substring(0, 16);
+        let formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = formatted;
+        if (value.length === 16) expDate.focus();
+      });
+      cardNumber.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && e.target.value.endsWith(' ')) {
+          e.target.value = e.target.value.slice(0, -1);
+        }
+      });
+    }
+  
+    if (expDate) {
+      expDate.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        let formatted = value.substring(0, 4);
+        if (formatted.length > 2) {
+          formatted = formatted.substring(0, 2) + '/' + formatted.substring(2);
+        }
+        e.target.value = formatted;
+        if (value.length === 4) cvv.focus();
+      });
+  
+      expDate.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && e.target.value.endsWith('/')) {
+          e.target.value = e.target.value.slice(0, -1);
+        }
+      });
+    }
+  
+    if (cvv) {
+      cvv.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+      });
+    }
+
+    // Функции для модального окна редактирования профиля
+    const modal = document.getElementById('editModal');
+    const modalContent = modal.querySelector('.modal-content');
+
+    window.openEditModal = function() {
+        modal.style.display = 'flex';
+    };
+
+    window.closeEditModal = function() {
+        modal.style.display = 'none';
+    };
+
+    // Закрытие модального окна при клике вне его содержимого
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeEditModal();
+        }
+    });
+});
