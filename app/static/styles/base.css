@@ -23,8 +23,7 @@ body {
 
 main {
     max-width: 1440px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 4rem auto;
 }
 
 a {
@@ -60,7 +59,7 @@ header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: transform 0.3s ease;
+    transition: all 0.2s;
 }
 
 .logo:hover {
@@ -280,19 +279,12 @@ header {
     border-radius: 0.5rem;
     font-weight: 500;
     transition: all 0.3s ease;
-}
-
-.login-btn {
     background-color: white;
 }
 
 .login-btn:hover {
     background: var(--dark-color);
     transform: translateY(-1px);
-}
-
-.register-btn {
-    background-color: white;
 }
 
 .register-btn:hover {
@@ -424,6 +416,7 @@ footer {
     opacity: 1;
 }
 
+/* Footer navigation */
 .footer-nav ul {
     list-style: none;
     display: grid;
@@ -496,63 +489,5 @@ footer {
     }
 }
 
-/* Кнопки */
-.login-btn,
-.register-btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
 
-.login-btn {
-    background-color: white;
-}
 
-.login-btn:hover {
-    background: var(--dark-color);
-    transform: translateY(-1px);
-}
-
-.register-btn {
-    background-color: white;
-}
-
-.register-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-/* Социальные иконки */
-.social-links {
-    display: flex;
-    flex-direction: row;
-    gap: 50px;
-}
-
-.social-links a {
-    scale: 1.2;
-    transition: all 0.1s;
-}
-
-.social-links a:hover {
-    transform: translateY(-10%);
-    filter: brightness(100%);
-    scale: 1.5;
-}
-
-/* Логотип */
-.logo {
-    transition: all 0.2s;
-}
-
-.logo:hover {
-    scale: 1.1;
-}
-
-/* Заголовки секций */
-.section-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--gray-color);
-}
