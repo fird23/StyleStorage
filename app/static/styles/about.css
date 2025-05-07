@@ -61,6 +61,10 @@
 }
 
 .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    padding: 100px 0 50px 0;
     position: relative;
     max-width: 800px;
     margin: 0 auto;
@@ -70,17 +74,16 @@
     content: '';
     position: absolute;
     left: 50px;
-    top: 0;
+    top: 40px;
     width: 4px;
-    height: 100%;
+    height: 90%;
     background: var(--light-color);
     border-radius: 2px;
 }
 
 .timeline-item {
     position: relative;
-    padding: 2rem 0 2rem 6rem;
-    margin-left: 2rem;
+    padding: 0 0 2rem 6rem;
 }
 
 .timeline-year {
@@ -101,6 +104,10 @@
     padding: 2rem;
     border-radius: 1rem;
     position: relative;
+
+    h3{
+        font-size: 24px;
+    }
 }
 
 .timeline-content::before {

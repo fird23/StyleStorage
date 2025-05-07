@@ -2,33 +2,65 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'styles/cart.css' %}">
+<link rel="stylesheet" href="{% static 'styles/order.css' %}">
 
 <div class="cart-container">
     <h2>Ваша корзина</h2>
-        {% if cart.items %}
+    {% if cart.items %}
+    <div class="order-wrapper">
+        <div class="cart-items-wrapper">
             <div class="cart-items">
                 {% for item in cart.items %}
                 <div class="cart-item" data-product-id="{{ item.product.id }}">
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                     <div class="item-details">
                         <h3>{{ item.product.name }}</h3>
+                        <div class="unit-price">{{ item.product.price }} ₽</div>
                         <div class="quantity-controls">
                             <button class="quantity-btn minus">-</button>
                             <span class="quantity">{{ item.quantity }}</span>
                             <button class="quantity-btn plus">+</button>
                         </div>
-                        <div class="price">{{ item.product.price }} ₽ x {{ item.quantity }}</div>
+                        <div class="item-total-price">{{ item.product.price|floatformat:2|add:""|floatformat:2 }} ₽</div>
+
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            <div class="cart-summary">
-                <h3>Итого: {{ cart.total_price }} ₽</h3>
-                <button class="checkout-btn">Оформить заказ</button>
-            </div>
-        {% else %}
-            <p>Ваша корзина пуста</p>
-        {% endif %}
+        </div>
+<form method="post" action="{% url 'order' %}">
+    {% csrf_token %}
+    <div class="order-details-wrapper">
+        <h3>Выберите карту</h3>
+        <select name="payment_card" id="payment_card" class="select-input" required>
+            {% for card in cards %}
+            <option value="{{ card.id }}">{{ card.formatted_number }}</option>
+            {% empty %}
+            <option disabled>Нет доступных карт</option>
+            {% endfor %}
+        </select>
+
+        <h3>Выберите адрес доставки</h3>
+        <select name="delivery_address" id="delivery_address" class="select-input" required>
+            {% for address in addresses %}
+            <option value="{{ forloop.counter0 }}">{{ address.city }}, {{ address.street }}, {{ address.house }}{% if address.apartment %}, кв. {{ address.apartment }}{% endif %}</option>
+            {% empty %}
+            <option disabled>Нет доступных адресов</option>
+            {% endfor %}
+        </select>
+
+        <div class="cart-summary">
+            <h3>Итого: {{ cart.total_price }} ₽</h3>
+            <button type="submit" class="checkout-btn">Оформить заказ</button>
+        </div>
     </div>
+</form>
+{% if error_message %}
+<p class="error-message">{{ error_message }}</p>
+{% endif %}
+    </div>
+    {% else %}
+    <p>Ваша корзина пуста</p>
+    {% endif %}
+</div>
 {% endblock %}

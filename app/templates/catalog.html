@@ -5,26 +5,26 @@
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'styles/catalog.css' %}">
-<main class="catalog-page">
+<main>
     <div class="container">
         <div class="catalog-container">
             <!-- Блок фильтров -->
             <aside class="filters-section">
                 <h2 class="section-title">Фильтры</h2>
                 <form method="get" action="{% url 'catalog' %}">
-                    <div class="filter-group">
-                        <h3 class="filter-title">Поиск по названию</h3>
-                        <input type="text" name="search" value="{{ search_query }}" placeholder="Введите название" class="form-control">
-                    </div>
+            <div class="filter-group">
+                <h3 class="filter-title">Поиск по названию</h3>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Введите название" class="form-control filter-input">
+            </div>
 
-                    <div class="filter-group">
-                        <h3 class="filter-title">Цена, ₽</h3>
-                        <div class="price-inputs">
-                            <input type="number" name="price_min" value="{{ price_min|default_if_none:'' }}" placeholder="От" min="0" class="price-input">
-                            <input type="number" name="price_max" value="{{ price_max|default_if_none:'' }}" placeholder="До" max="100000" class="price-input">
-                        </div>
-                        <div class="price-range"></div>
-                    </div>
+            <div class="filter-group">
+                <h3 class="filter-title">Цена, ₽</h3>
+                <div class="price-inputs">
+                    <input type="number" name="price_min" value="{{ price_min|default_if_none:'' }}" placeholder="От" min="0" class="price-input filter-input">
+                    <input type="number" name="price_max" value="{{ price_max|default_if_none:'' }}" placeholder="До" max="100000" class="price-input filter-input">
+                </div>
+                <div class="price-range"></div>
+            </div>
 
                     <div class="filter-group">
                         <h3 class="filter-title">Тип изделия</h3>
@@ -57,93 +57,90 @@
                             </label>
                         </div>
                     </div>
-
-                    <button type="submit" class="cta-btn primary-cta full-width">Применить фильтры</button>
+                    <button type="submit" class="apply-btn filter-btn">Применить фильтры</button>
                 </form>
             </aside>
 
             <!-- Сетка товаров -->
             <div class="products-section">
-                <div class="products-grid">
-                    {% for product in products %}
-                    <article class="product-card" itemscope itemtype="http://schema.org/Product">
-                        <div class="product-image">
-                            <img src="{{ product.image.url }}" 
-                                 alt="{{ product.name }}"
-                                 loading="lazy">
+                {% for product in products %}
+                <article class="product-card" itemscope itemtype="http://schema.org/Product">
+                    <div class="product-image"><img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy"></div>
+                    <div class="product-info">
+                        <h3 class="product-title" itemprop="name">{{ product.name }}</h3>
+                        <p class="product-description" itemprop="description">
+                            {% if product.description|length > 100 %}
+                                {{ product.description|slice:":100" }}...
+                            {% else %}
+                                {{ product.description }}
+                            {% endif %}
+                        </p>
+                        <p class="product-material">Материал: {{ product.material }}</p>
+                        <p class="product-category">Тип изделия: {{ product.get_category_display }}</p>
+                        <div class="product-price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                            <span itemprop="priceCurrency" content="RUB">₽</span>
+                            <span itemprop="price">{{ product.price }}</span>
                         </div>
-                        <div class="product-info">
-                            <h3 class="product-title" itemprop="name">{{ product.name }}</h3>
-                            <p class="product-description" itemprop="description">
-                                {% if product.description|length > 100 %}
-                                    {{ product.description|slice:":100" }}...
-                                {% else %}
-                                    {{ product.description }}
-                                {% endif %}
-                            </p>
-                            <p class="product-material">Материал: {{ product.material }}</p>
-                            <p class="product-category">Тип изделия: {{ product.get_category_display }}</p>
-                            <div class="product-price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-                                <span itemprop="priceCurrency" content="RUB">₽</span>
-                                <span itemprop="price">{{ product.price }}</span>
-                            </div>
-                            <div class="product-actions">
-                                <a href="#" class="details-btn" data-product-id="{{ product.id }}">Подробнее</a>
-                                <button class="btn-cart" title="Добавить в корзину" data-product-id="{{ product.id }}" type="button">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                                {% if user.is_staff %}
-                                <form method="post" action="{% url 'delete_product' product.id %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-delete">Удалить</button>
-                                </form>
-                                {% endif %}
-                            </div>
+                        <div class="product-actions">
+                            <a href="#" class="details-btn" data-product-id="{{ product.id }}">Подробнее</a>
+                            <button class="btn-cart" title="Добавить в корзину" data-product-id="{{ product.id }}" type="button">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                            {% if user.is_staff %}
+                            <form method="post" action="{% url 'delete_product' product.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete">Удалить</button>
+                            </form>
+                            {% endif %}
                         </div>
-                    </article>
-                    {% empty %}
-                    <p>Товары не найдены.</p>
-                    {% endfor %}
-
-                    <!-- Остальные товары -->
-                </div>
+                    </div>
+                </article>
+                {% empty %}
+                <p>Товары не найдены.</p>
+                {% endfor %}
             </div>
+        </div>
 
-            <!-- Пагинация -->
+        <!-- Пагинация -->
+        <div class="pagination-container">
             <div class="pagination">
-                    {% if page_obj.has_previous %}
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ page_obj.previous_page_number }}" class="page-link">Назад</a>
-                    {% else %}
-                        <span class="page-link disabled">Назад</span>
+                {% if page_obj.has_previous %}
+                    <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ page_obj.previous_page_number }}" class="page-link">Назад</a>
+                {% else %}
+                    <span class="page-link disabled">Назад</span>
+                {% endif %}
+        
+                {% for num in paginator.page_range %}
+                    {% if num == page_obj.number %}
+                        <span class="page-link active">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ num }}" class="page-link">{{ num }}</a>
                     {% endif %}
-
-                    {% for num in paginator.page_range %}
-                        {% if num == page_obj.number %}
-                            <span class="page-link active">{{ num }}</span>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ num }}" class="page-link">{{ num }}</a>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ page_obj.next_page_number }}" class="page-link">Вперед</a>
-                    {% else %}
-                        <span class="page-link disabled">Вперед</span>
-                    {% endif %}
-                </div>
+                {% endfor %}
+        
+                {% if page_obj.has_next %}
+                    <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if price_min %}price_min={{ price_min }}&{% endif %}{% if price_max %}price_max={{ price_max }}&{% endif %}{% for cat in selected_categories %}category={{ cat }}&{% endfor %}{% for mat in selected_materials %}material={{ mat }}&{% endfor %}page={{ page_obj.next_page_number }}" class="page-link">Вперед</a>
+                {% else %}
+                    <span class="page-link disabled">Вперед</span>
+                {% endif %}
             </div>
         </div>
     </div>
     <div id="productModal" class="modal" style="display:none;">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2 id="modal-product-name"></h2>
-            <img id="modal-product-image" src="" alt="" />
-            <p id="modal-product-description"></p>
-            <p><strong>Материал:</strong> <span id="modal-product-material"></span></p>
-            <p><strong>Тип изделия:</strong> <span id="modal-product-category"></span></p>
-            <p><strong>Размеры:</strong> <span id="modal-product-dimensions"></span></p>
-            <p><strong>Цена:</strong> <span id="modal-product-price"></span></p>
+            <div class="modal-body">
+                <img id="modal-product-image" src="" alt="" />
+                <div class="modal-details">
+                    <h2 id="modal-product-name"></h2>
+                    <p id="modal-product-description"></p>
+                    <p><strong>Материал:</strong> <span id="modal-product-material"></span></p>
+                    <p><strong>Тип изделия:</strong> <span id="modal-product-category"></span></p>
+                    <p><strong>Размеры:</strong> <span id="modal-product-dimensions"></span></p>
+                    <p><strong>Цена:</strong> <span id="modal-product-price"></span></p>
+                    <button id="modal-add-to-cart" class="btn-cart" type="button">Добавить в корзину</button>
+                </div>
+            </div>
         </div>
     </div>
 </main>

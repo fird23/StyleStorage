@@ -4,21 +4,21 @@
     --dark-color: #1A365D;
     --light-color: #f8fafc;
     --text-color: #1e293b;
+    --gray-color: rgb(38, 38, 38);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Базовые стили */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
 }
 
-body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+body {  
     line-height: 1.6;
     color: var(--text-color);
-    background-color: var(--light-color);
 }
 
 main {
@@ -35,11 +35,12 @@ a {
 
 /* Шапка */
 header {
-    background: white;
+    background: var(--light-color);
     display: flex;
     width: 100%;
-    height: 100px;
+    height: 80px;
     justify-content: center;
+    box-shadow: var(--shadow);
 }
 
 .nav-container {
@@ -48,6 +49,7 @@ header {
     justify-content: space-between;
     width: 100%;
     max-width: 1440px;
+    padding: 0 1rem;
 }
 
 .logo {
@@ -55,6 +57,14 @@ header {
     font-weight: 700;
     color: var(--primary-color);
     letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.1);
 }
 
 .nav-list {
@@ -62,6 +72,151 @@ header {
     gap: 1.5rem;
     align-items: center;
     list-style: none;
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 28px;
+    height: 22px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 12000;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+}
+
+.hamburger-line {
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+    transition: all 0.3s linear;
+}
+
+.hamburger.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.main-nav {
+    position: relative;
+}
+.menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+@media (max-width: 992px) {
+    .menu-overlay.active {
+        display: block;
+    }
+}
+.nav-list.active {
+    display: flex !important;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    background: var(--light-color);
+    width: 40%;
+    box-shadow: var(--shadow);
+    border-radius: 0 0 0 8px;
+    padding: 1rem 0;
+    z-index: 11000;
+    overflow-y: auto;
+    align-items: flex-start;
+    animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.nav-list.active li {
+    padding: 0.5rem 1rem;
+}
+
+.nav-list.active li a, .nav-list.active .dropbtn {
+    display: block;
+    width: 100%;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.nav-list.active .dropdown-content {
+    display: none;
+    position: static;
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+}
+
+.nav-list.active li.dropdown:hover > .dropdown-content {
+    display: block;
+    position: static;
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+}
+
+.nav-list li.dropdown:hover > .dropdown-content {
+    display: block;
+}
+
+/* Close button for burger menu */
+.burger-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--primary-color);
+    z-index: 12000;
+}
+
+/* Overlay to darken the rest of the screen */
+.burger-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: calc(100vw - 250px);
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 10500;
+    display: none;
+}
+
+.burger-overlay.active {
+    display: block;
 }
 
 .nav-list li {
@@ -128,8 +283,7 @@ header {
 }
 
 .login-btn {
-    background: var(--primary-color);
-    color: white;
+    background-color: white;
 }
 
 .login-btn:hover {
@@ -138,8 +292,7 @@ header {
 }
 
 .register-btn {
-    background: var(--accent-color);
-    color: white;
+    background-color: white;
 }
 
 .register-btn:hover {
@@ -157,6 +310,7 @@ header {
     background: linear-gradient(45deg, var(--primary-color), var(--dark-color));
     color: white;
     overflow: hidden;
+    border-radius: 10px;
 }
 
 .hero-content {
@@ -178,7 +332,8 @@ header {
     font-size: 1.25rem;
     margin-bottom: 2rem;
     max-width: 600px;
-    margin: 0 auto 2rem;
+    margin-left: auto;
+    margin-right: auto;
     opacity: 0.9;
 }
 
@@ -295,7 +450,11 @@ footer {
 /* Адаптивность */
 @media (max-width: 1024px) {
     .nav-list {
-        display: none;
+        display: none !important;
+    }
+
+    .hamburger {
+        display: flex !important;
     }
 
     .hero-title {
@@ -323,71 +482,77 @@ footer {
     .cta-buttons {
         flex-direction: column;
         gap: 1rem;
+        width: 100%;
+        margin: 0 auto;
     }
     
-    .cta-btn {
-        width: 100%;
+    .cta-buttons a {
+        font-size: 18px;
+        transition: all 0.1s;
+    }
+    
+    .cta-buttons a:hover {
+        transform: translateY(-15%);
     }
 }
 
-/* Стили для выпадающего меню навигации */
-.nav-list {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-    list-style: none;
-}
-
-.nav-list li {
-    position: relative;
-    padding: 0.5rem 0;
-}
-
-.nav-list li a, .dropbtn {
-    padding: 0.5rem 1rem;
+/* Кнопки */
+.login-btn,
+.register-btn {
+    padding: 0.75rem 1.5rem;
     border-radius: 0.5rem;
+    font-weight: 500;
     transition: all 0.3s ease;
-    cursor: pointer;
-    display: inline-block;
-    color: var(--text-color);
 }
 
-.nav-list li a:hover, .dropbtn:hover {
-    background: var(--light-color);
-    color: var(--accent-color);
-}
-
-/* Контейнер для выпадающего контента */
-.dropdown-content {
-    display: none;
-    position: absolute;
+.login-btn {
     background-color: white;
-    min-width: 160px;
-    box-shadow: var(--shadow);
-    border-radius: 0.5rem;
-    z-index: 1000;
-    top: 100%;
-    left: 0;
-    list-style: none;
 }
 
-/* Стили для элементов выпадающего меню */
-.dropdown-content li {
-    padding: 0;
+.login-btn:hover {
+    background: var(--dark-color);
+    transform: translateY(-1px);
 }
 
-.dropdown-content li a {
-    padding: 0.5rem 1rem;
-    display: block;
-    color: var(--text-color);
+.register-btn {
+    background-color: white;
 }
 
-.dropdown-content li a:hover {
-    background-color: var(--light-color);
-    color: var(--accent-color);
+.register-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
-/* Показать выпадающее меню при наведении */
-.nav-list li.dropdown:hover > .dropdown-content {
-    display: block;
+/* Социальные иконки */
+.social-links {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+}
+
+.social-links a {
+    scale: 1.2;
+    transition: all 0.1s;
+}
+
+.social-links a:hover {
+    transform: translateY(-10%);
+    filter: brightness(100%);
+    scale: 1.5;
+}
+
+/* Логотип */
+.logo {
+    transition: all 0.2s;
+}
+
+.logo:hover {
+    scale: 1.1;
+}
+
+/* Заголовки секций */
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gray-color);
 }

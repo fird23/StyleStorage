@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}StyleStorage{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/base.css' %}">
     <link rel="stylesheet" href="{% static 'fontawesome-free-6.4.0-web/css/all.min.css' %}">
 </head>
@@ -15,32 +16,39 @@
             <div class="logo">
                 <a href="{% url 'home' %}">StyleStorage</a>
             </div>
+            <button class="hamburger" aria-label="Toggle navigation" id="hamburgerBtn">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            <div class="menu-overlay"></div>
+            <button class="burger-close-btn" id="burgerCloseBtn" aria-label="Close menu" style="display:none;">&times;</button>
             <nav class="main-nav">
                 <ul class="nav-list">
                     <li class="dropdown">
-                        <a href="#" class="dropbtn">Главное</a>
+                        <a href="#" class="dropbtn"><i class="fas fa-home"></i> Главное</a>
                         <ul class="dropdown-content">
-                            <li><a href="{% url 'home' %}">Главная</a></li>
-                            <li><a href="{% url 'catalog' %}">Каталог</a></li>
-                            <li><a href="{% url 'order' %}">Заказ</a></li>
+                            <li><a href="{% url 'home' %}"><i class="fas fa-home"></i> Главная</a></li>
+                            <li><a href="{% url 'catalog' %}"><i class="fas fa-th-large"></i> Каталог</a></li>
+                            <li><a href="{% url 'order' %}"><i class="fas fa-shopping-cart"></i> Заказ</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
-                        <a href="#" class="dropbtn">Полезное</a>
+                        <a href="#" class="dropbtn"><i class="fas fa-info-circle"></i> Полезное</a>
                         <ul class="dropdown-content">
-                            <li><a href="{% url 'about' %}">О компании</a></li>
-                            <li><a href="{% url 'contacts' %}">Контакты</a></li>
-                            <li><a href="#reviews">Отзывы</a></li>
+                            <li><a href="{% url 'about' %}"><i class="fas fa-building"></i> О компании</a></li>
+                            <li><a href="{% url 'contacts' %}"><i class="fas fa-phone"></i> Контакты</a></li>
+                            <li><a href="#reviews"><i class="fas fa-star"></i> Отзывы</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
-                        <a href="#" class="dropbtn">Профиль</a>
+                        <a href="#" class="dropbtn"><i class="fas fa-user"></i> Профиль</a>
                         <ul class="dropdown-content">
                             {% if user.is_authenticated %}
-                                <li><a href="{% url 'profile' %}">Профиль</a></li>
+                                <li><a href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> Профиль</a></li>
                                 {% if user.is_staff %}
-                                    <li><a href="{% url 'add_product' %}">Добавить товар</a></li>
-                                    <li><a href="{% url 'admin:index' %}" class="admin-btn">Админ-панель</a></li>
+                                    <li><a href="{% url 'add_product' %}"><i class="fas fa-plus-circle"></i> Добавить товар</a></li>
+                                    <li><a href="{% url 'admin:index' %}" class="admin-btn"><i class="fas fa-tools"></i> Админ-панель</a></li>
                                 {% endif %}
                                 <li>
                                     <a href="{% url 'logout' %}" class="nav-link">
@@ -48,13 +56,30 @@
                                     </a>
                                 </li>
                             {% else %}
-                                <li><a href="{% url 'register' %}" class="register-btn">Регистрация</a></li>
-                                <li><a href="{% url 'login' %}" class="login-btn">Войти</a></li>
+                                <li><a href="{% url 'register' %}" class="register-btn"><i class="fas fa-user-plus"></i> Регистрация</a></li>
+                                <li><a href="{% url 'login' %}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Войти</a></li>
                             {% endif %}
                         </ul>
                     </li>
                 </ul>
+                <!-- Добавляем плоское меню для бургер-меню -->
+                <ul class="nav-list burger-flat-menu" style="display:none;">
+                    <li><a href="{% url 'home' %}"><i class="fas fa-home"></i> Главная</a></li>
+                    <li><a href="{% url 'catalog' %}"><i class="fas fa-th-large"></i> Каталог</a></li>
+                    <li><a href="{% url 'order' %}"><i class="fas fa-shopping-cart"></i> Заказ</a></li>
+                    <li><a href="{% url 'about' %}"><i class="fas fa-building"></i> О компании</a></li>
+                    <li><a href="{% url 'contacts' %}"><i class="fas fa-phone"></i> Контакты</a></li>
+                    <li><a href="#reviews"><i class="fas fa-star"></i> Отзывы</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> Профиль</a></li>
+                        <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Выйти</a></li>
+                    {% else %}
+                        <li><a href="{% url 'register' %}"><i class="fas fa-user-plus"></i> Регистрация</a></li>
+                        <li><a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Войти</a></li>
+                    {% endif %}
+                </ul>
             </nav>
+            <div class="burger-overlay" id="burgerOverlay"></div>
         </div>
     </header>
 
@@ -66,36 +91,69 @@
         <div class="footer-container">
             <div class="footer-info">
                 <div class="footer-logo">
-                    <a href="{% url 'home' %}">EliteCloset</a>
+                    <a href="{% url 'home' %}">StyleStorage</a>
                     <p>Индивидуальные решения для вашего пространства</p>
                 </div>
                 <div class="contacts">
-                    <p>+7 (495) 123-45-67</p>
-                    <p>Москва, ул. Мебельная, 12</p>
-                    <p>info@elitecloset.ru</p>
+                    <p><i class="fas fa-phone"></i> +7 (495) 123-45-67</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Мебельная, 12</p>
+                    <p><i class="fas fa-envelope"></i> info@elitecloset.ru</p>
                 </div>
             </div>
             
+            <nav class="footer-nav">
+                <ul>
+                    <li><a href="{% url 'about' %}"><i class="fas fa-building"></i> О компании</a></li>
+                    <li><a href="{% url 'catalog' %}"><i class="fas fa-th-large"></i> Каталог</a></li>
+                    <li><a href="{% url 'order' %}"><i class="fas fa-shopping-cart"></i> Оформление заказа</a></li>
+                    <li><a href="#reviews"><i class="fas fa-star"></i> Отзывы</a></li>
+                    <li><a href="#contacts"><i class="fas fa-phone"></i> Контакты</a></li>
+                </ul>
+            </nav>
+
             <div class="social-links">
                 <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
                 <a href="#" class="social-icon"><i class="fab fa-pinterest"></i></a>
                 <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
             </div>
-
-            <nav class="footer-nav">
-                <ul>
-                    <li><a href="{% url 'about' %}">О компании</a></li>
-                    <li><a href="{% url 'catalog' %}">Каталог</a></li>
-                    <li><a href="{% url 'order' %}">Оформление заказа</a></li>
-                    <li><a href="#reviews">Отзывы</a></li>
-                    <li><a href="#contacts">Контакты</a></li>
-                </ul>
-            </nav>
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/addons/cleave-phone.ru.js"></script>
     <script src="{% static 'scripts/main.js' %}"></script>
     <script src="{% static 'scripts/catalog.js' %}"></script>
+    <script>
+        // Скрипт для переключения меню
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const burgerCloseBtn = document.getElementById('burgerCloseBtn');
+        const navList = document.querySelector('.nav-list');
+        const burgerFlatMenu = document.querySelector('.burger-flat-menu');
+        const burgerOverlay = document.getElementById('burgerOverlay');
+
+        hamburgerBtn.addEventListener('click', () => {
+            navList.style.display = 'none';
+            burgerFlatMenu.style.display = 'flex';
+            burgerFlatMenu.classList.add('active');
+            hamburgerBtn.style.display = 'none';
+            burgerCloseBtn.style.display = 'block';
+            burgerOverlay.classList.add('active');
+        });
+
+        burgerCloseBtn.addEventListener('click', () => {
+            burgerFlatMenu.style.display = 'none';
+            burgerFlatMenu.classList.remove('active');
+            hamburgerBtn.style.display = 'flex';
+            burgerCloseBtn.style.display = 'none';
+            burgerOverlay.classList.remove('active');
+        });
+
+        burgerOverlay.addEventListener('click', () => {
+            burgerFlatMenu.style.display = 'none';
+            burgerFlatMenu.classList.remove('active');
+            hamburgerBtn.style.display = 'flex';
+            burgerCloseBtn.style.display = 'none';
+            burgerOverlay.classList.remove('active');
+        });
+    </script>
 </body>
 </html>
