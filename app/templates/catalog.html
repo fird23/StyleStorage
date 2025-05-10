@@ -87,9 +87,11 @@
                                 <i class="fas fa-shopping-cart"></i>
                             </button>
                             {% if user.is_staff %}
-                            <form method="post" action="{% url 'delete_product' product.id %}" style="display:inline;">
+                            <form method="post" action="{% url 'delete_product' product.id %}" class="delete-form">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-delete">Удалить</button>
+                                <button type="submit" class="btn-delete-icon" title="Удалить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </form>
                             {% endif %}
                         </div>
