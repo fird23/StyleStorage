@@ -15,7 +15,8 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_p
 from django.utils.decorators import method_decorator
 
 def home(request):
-    return render(request, "home.html")
+    latest_products = Product.objects.order_by('-created_at')[:6]
+    return render(request, "home.html", {'latest_products': latest_products})
 
 def add_product(request):
     if request.method == 'POST':
@@ -248,16 +249,74 @@ def order(request):
     if not user.is_authenticated:
         return redirect('login')
     cart, created = Cart.objects.get_or_create(user=user)
-    items = []
-    total_price = 0
-    for item in cart.items.select_related('product').all():
-        items.append({
-            'product': item.product,
-            'quantity': item.quantity
-        })
-        total_price += item.product.price * item.quantity
-    cart_obj = CartContext(items, total_price)
-    return render(request, 'order.html', {'cart': cart_obj})
+    if request.method == 'POST':
+        card_id = request.POST.get('payment_card')
+        address_index = request.POST.get('delivery_address')
+        cards = user.payment_cards.all()
+        addresses = user.address if user.address else []
+        # Validate card
+        try:
+            selected_card = cards.get(id=card_id)
+        except (PaymentCard.DoesNotExist, ValueError, TypeError):
+            selected_card = None
+        # Validate address
+        try:
+            address_index = int(address_index)
+            if 0 <= address_index < len(addresses):
+                selected_address = addresses[address_index]
+            else:
+                selected_address = None
+        except (ValueError, TypeError):
+            selected_address = None
+        if not selected_card or not selected_address:
+            items = []
+            total_price = 0
+            for item in cart.items.select_related('product').all():
+                item_total_price = float(item.product.price) * item.quantity
+                items.append({
+                    'product': item.product,
+                    'quantity': item.quantity,
+                    'item_total_price': item_total_price,
+                })
+                total_price += item_total_price
+            cart_obj = CartContext(items, total_price)
+            error_message = "Пожалуйста, выберите корректную карту и адрес доставки."
+            return render(request, 'order.html', {'cart': cart_obj, 'cards': cards, 'addresses': addresses, 'error_message': error_message})
+        # Calculate total price
+        total_price = 0
+        products = []
+        for item in cart.items.select_related('product').all():
+            total_price += item.product.price * item.quantity
+            products.append(item.product)
+        # Create order
+        order = Order.objects.create(
+            user=user,
+            total_price=total_price,
+            payment_card=selected_card,
+            delivery_address=selected_address
+        )
+        order.products.set(products)
+        # Clear cart
+        cart.items.all().delete()
+        return redirect('order_confirmation', order_id=order.id)
+    else:
+        items = []
+        total_price = 0
+        for item in cart.items.select_related('product').all():
+            item_total_price = item.product.price * item.quantity
+            items.append({
+                'product': item.product,
+                'quantity': item.quantity,
+                'item_total_price': item_total_price,
+            })
+            total_price += item_total_price
+        cart_obj = CartContext(items, total_price)
+        cards = user.payment_cards.all()
+        for card in cards:
+            digits_only = ''.join(filter(str.isdigit, card.card_number))
+            card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
+        addresses = user.address if user.address else []
+        return render(request, 'order.html', {'cart': cart_obj, 'cards': cards, 'addresses': addresses})
 
 
 
@@ -296,8 +355,8 @@ def update_cart_item_quantity(request, product_id):
     return JsonResponse({
         'success': True,
         'quantity': cart_item.quantity,
-        'item_total_price': cart_item.product.price * cart_item.quantity,
-        'total_price': total_price
+        'item_total_price': float(cart_item.product.price) * cart_item.quantity,
+        'total_price': float(total_price)
     })
 
 def product_modal(request, product_id):

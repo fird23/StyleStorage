@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'styles/admin.css' %}">
+<link rel="stylesheet" href="{% static 'styles/add_product.css' %}">
 
 <div class="admin-container container">
     <h1>Добавить новый товар</h1>
@@ -40,7 +40,7 @@
                 <label>Изображение:</label>
                 <div class="file-upload">
                     {{ form.image }}
-                    <span class="file-label">Выберите файл</span>
+                    <label class="file-label" for="id_image">Выберите файл</label>
                 </div>
             </div>
         </div>

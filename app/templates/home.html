@@ -4,36 +4,67 @@
 {% block title %}StyleStorage{% endblock %}
 
 {% block content %}
-    <main>
-        <section class="hero">
-            <div class="hero-content">
-                <h1 class="hero-title">Индивидуальные гардеробные решения для вашего дома</h1>
-                <p class="hero-text">Создаем идеальные системы хранения с 2010 года. Более 5000 реализованных проектов по всей России</p>
-                <div class="cta-buttons">
-                    <a href="#catalog" class="cta-btn primary-cta">Выбрать шкаф</a>
-                    <a href="#designer" class="cta-btn secondary-cta">Вызвать замерщика</a>
-                </div>
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title hero-title-custom">Индивидуальные гардеробные решения для вашего дома</h1>
+            <p class="hero-text hero-text-custom">Создаем идеальные системы хранения с 2010 года. Более 5000 реализованных проектов по всей России</p>
+            <div class="cta-buttons cta-buttons-custom">
+                <a href="#latest-products" class="cta-btn primary-cta btn-custom">Выбрать шкаф</a>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="features">
-            <div class="features-grid">
-                <div class="feature-card">
-                    <img src="https://www.svgrepo.com/show/361729/guarantee.svg" alt="Гарантия" class="feature-icon">
-                    <h3 class="feature-title">10 лет гарантии</h3>
-                    <p>На все изделия и фурнитуру</p>
-                </div>
-                <div class="feature-card">
-                    <img src="https://www.svgrepo.com/show/361476/ruler.svg" alt="Индивидуальный подход" class="feature-icon">
-                    <h3 class="feature-title">Индивидуальный подход</h3>
-                    <p>Точный расчет под ваши размеры</p>
-                </div>
-                <div class="feature-card">
-                    <img src="https://www.svgrepo.com/show/361674/eco.svg" alt="Экологичность" class="feature-icon">
-                    <h3 class="feature-title">Экологичные материалы</h3>
-                    <p>Безопасность для вашей семьи</p>
-                </div>
+    <section class="features features-custom">
+        <div class="features-grid">
+            <div class="feature-card feature-card-custom">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <h3 class="feature-title">10 лет гарантии</h3>
+                <p>На все изделия и фурнитуру</p>
             </div>
-        </section>
-    </main>
+            <div class="feature-card feature-card-custom">
+                <i class="fas fa-ruler-combined feature-icon"></i>
+                <h3 class="feature-title">Индивидуальный подход</h3>
+                <p>Точный расчет под ваши размеры</p>
+            </div>
+            <div class="feature-card feature-card-custom">
+                <i class="fas fa-leaf feature-icon"></i>
+                <h3 class="feature-title">Экологичные материалы</h3>
+                <p>Безопасность для вашей семьи</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="latest-products" class="latest-products-section">
+        <h2 class="section-title latest-products-title">Последние товары</h2>
+        <div class="products-grid">
+            {% for product in latest_products %}
+            <article class="product-card" itemscope itemtype="http://schema.org/Product">
+                <div class="product-image"><img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy"></div>
+                <div class="product-info">
+                    <h3 class="product-title" itemprop="name">{{ product.name }}</h3>
+                    <p class="product-description" itemprop="description">{{ product.description|truncatewords:15 }}</p>
+                    <p class="product-price">{{ product.price }} ₽</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="reviews" class="reviews-section">
+        <h2 class="section-title">Оставить отзыв</h2>
+        <form class="review-form" action="#" method="post">
+            <div class="form-group">
+                <label for="review-name">Ваше имя</label>
+                <input type="text" id="review-name" name="review-name" placeholder="Введите ваше имя" disabled>
+            </div>
+            <div class="form-group">
+                <label for="review-text">Отзыв</label>
+                <textarea id="review-text" name="review-text" rows="4" placeholder="Напишите ваш отзыв" disabled></textarea>
+            </div>
+            <button type="submit" class="btn submit-review-btn" disabled>Отправить</button>
+            <p class="review-note">Форма пока не активна, скоро будет доступна.</p>
+        </form>
+    </section>
+</main>
 {% endblock %}
