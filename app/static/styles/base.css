@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
     --primary-color: #2A4365;
     --accent-color: #4299E1;
@@ -303,6 +307,7 @@ header {
     color: white;
     overflow: hidden;
     border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .hero-content {
@@ -318,6 +323,7 @@ header {
     margin-bottom: 1.5rem;
     line-height: 1.1;
     letter-spacing: -1px;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
 }
 
 .hero-text {
@@ -326,13 +332,38 @@ header {
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
-    opacity: 0.9;
+    opacity: 0.95;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.cta-btn {
+    padding: 0.75rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border: none;
+    color: white;
+    background-color: var(--accent-color);
+    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.5);
+}
+
+.cta-btn:hover {
+    background-color: var(--dark-color);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(26, 54, 93, 0.7);
 }
 
 /* Преимущества */
 .features {
     padding: 6rem 2rem;
-    background: white;
+    background: #f9fafb;
 }
 
 .features-grid {
@@ -340,20 +371,21 @@ header {
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+    gap: 2.5rem;
 }
 
 .feature-card {
     padding: 2.5rem 2rem;
     background: white;
     border-radius: 1rem;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
 }
 
 .feature-icon {
@@ -363,12 +395,170 @@ header {
     padding: 1rem;
     background: var(--light-color);
     border-radius: 50%;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
 }
 
 .feature-title {
-    font-size: 1.375rem;
+    font-size: 1.5rem;
     margin-bottom: 1rem;
     color: var(--primary-color);
+}
+
+/* Последние товары */
+.latest-products-section {
+    padding: 4rem 2rem;
+    background: var(--light-color);
+}
+
+.latest-products-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+}
+
+.products-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+}
+
+.product-card {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+    border: 1px solid #3498db;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 320px;
+    max-height: 520px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+    border-color: #3498db;
+}
+
+.product-image {
+    position: relative;
+    height: 260px;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.product-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--primary-color);
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Кнопка перехода в каталог */
+.catalog-button-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* Hide buttons on home page product cards */
+#latest-products .product-actions,
+#latest-products .btn-details,
+#latest-products .btn-cart {
+    display: none !important;
+}
+
+/* Блок отзывов */
+.reviews-section {
+    padding: 4rem 2rem;
+    background: white;
+    max-width: 800px;
+    margin: 3rem auto 0;
+    border-radius: 1rem;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.review-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.review-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.review-form input[type="text"],
+.review-form textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    resize: vertical;
+    background-color: #f5f7fa;
+    color: var(--text-color);
+}
+
+.review-form input[type="text"]:disabled,
+.review-form textarea:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.review-form button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transition: background-color 0.3s ease;
+}
+
+.review-form button:hover {
+    background-color: var(--dark-color);
+}
+
+.review-note {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--gray-color);
+    text-align: center;
 }
 
 /* Подвал */

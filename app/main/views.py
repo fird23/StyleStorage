@@ -15,7 +15,8 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_p
 from django.utils.decorators import method_decorator
 
 def home(request):
-    return render(request, "home.html")
+    latest_products = Product.objects.order_by('-created_at')[:6]
+    return render(request, "home.html", {'latest_products': latest_products})
 
 def add_product(request):
     if request.method == 'POST':
