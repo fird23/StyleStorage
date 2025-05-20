@@ -12,19 +12,19 @@
             <aside class="filters-section">
                 <h2 class="section-title">Фильтры</h2>
                 <form method="get" action="{% url 'catalog' %}">
-            <div class="filter-group">
-                <h3 class="filter-title">Поиск по названию</h3>
-                <input type="text" name="search" value="{{ search_query }}" placeholder="Введите название" class="form-control filter-input">
-            </div>
+                    <div class="filter-group">
+                        <h3 class="filter-title">Поиск по названию</h3>
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Введите название" class="form-control filter-input">
+                    </div>
 
-            <div class="filter-group">
-                <h3 class="filter-title">Цена, ₽</h3>
-                <div class="price-inputs">
-                    <input type="number" name="price_min" value="{{ price_min|default_if_none:'' }}" placeholder="От" min="0" class="price-input filter-input">
-                    <input type="number" name="price_max" value="{{ price_max|default_if_none:'' }}" placeholder="До" max="100000" class="price-input filter-input">
-                </div>
-                <div class="price-range"></div>
-            </div>
+                    <div class="filter-group">
+                        <h3 class="filter-title">Цена, ₽</h3>
+                        <div class="price-inputs">
+                            <input type="number" name="price_min" value="{{ price_min|default_if_none:'' }}" placeholder="От" min="0" class="price-input filter-input">
+                            <input type="number" name="price_max" value="{{ price_max|default_if_none:'' }}" placeholder="До" max="100000" class="price-input filter-input">
+                        </div>
+                        <div class="price-range"></div>
+                    </div>
 
                     <div class="filter-group">
                         <h3 class="filter-title">Тип изделия</h3>
@@ -43,18 +43,12 @@
                     <div class="filter-group">
                         <h3 class="filter-title">Материал</h3>
                         <div class="filter-options">
+                            {% for material in all_materials %}
                             <label class="filter-checkbox">
-                                <input type="checkbox" name="material" value="ДСП" {% if 'ДСП' in selected_materials %}checked{% endif %}>
-                                <span>ДСП</span>
+                                <input type="checkbox" name="material" value="{{ material.id }}" {% if material.id|stringformat:"s" in selected_materials %}checked{% endif %}>
+                                <span>{{ material.name }}</span>
                             </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" name="material" value="МДФ" {% if 'МДФ' in selected_materials %}checked{% endif %}>
-                                <span>МДФ</span>
-                            </label>
-                            <label class="filter-checkbox">
-                                <input type="checkbox" name="material" value="Натуральное дерево" {% if 'Натуральное дерево' in selected_materials %}checked{% endif %}>
-                                <span>Натуральное дерево</span>
-                            </label>
+                            {% endfor %}
                         </div>
                     </div>
                     <button type="submit" class="apply-btn filter-btn">Применить фильтры</button>

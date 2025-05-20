@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="article-detail">
+    <h1>{{ article.title }}</h1>
+    
+    <div class="article-meta">
+        <span>Автор: {{ article.author.get_full_name }}</span>
+        <span>Дата: {{ article.created_at|date:"d.m.Y" }}</span>
+    </div>
+    
+    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-image">
+    
+    <div class="article-content">
+        {{ article.content|linebreaks }}
+    </div>
+    
+    <a href="{% url 'home' %}" class="back-link">← Назад к списку статей</a>
+</article>
+{% endblock %}

@@ -17,20 +17,20 @@
 
     <section class="features features-custom">
         <div class="features-grid">
-            <div class="feature-card feature-card-custom">
-                <i class="fas fa-shield-alt feature-icon"></i>
+            <div class="feature-card feature-card-custom feature-card-improved">
+                <i class="fas fa-award feature-icon"></i>
                 <h3 class="feature-title">10 лет гарантии</h3>
                 <p>На все изделия и фурнитуру</p>
             </div>
-            <div class="feature-card feature-card-custom">
-                <i class="fas fa-ruler-combined feature-icon"></i>
-                <h3 class="feature-title">Индивидуальный подход</h3>
-                <p>Точный расчет под ваши размеры</p>
+            <div class="feature-card feature-card-custom feature-card-improved">
+                <i class="fas fa-warehouse feature-icon"></i>
+                <h3 class="feature-title">Широкий ассортимент</h3>
+                <p>Большой выбор шкафов и систем хранения</p>
             </div>
-            <div class="feature-card feature-card-custom">
-                <i class="fas fa-leaf feature-icon"></i>
-                <h3 class="feature-title">Экологичные материалы</h3>
-                <p>Безопасность для вашей семьи</p>
+            <div class="feature-card feature-card-custom feature-card-improved">
+                <i class="fas fa-truck feature-icon"></i>
+                <h3 class="feature-title">Быстрая доставка</h3>
+                <p>Доставляем по всей России в кратчайшие сроки</p>
             </div>
         </div>
     </section>
@@ -49,8 +49,38 @@
             </article>
             {% endfor %}
         </div>
+        <div class="catalog-button-container">
+            <a href="{% url 'catalog' %}" class="cta-btn">Перейти в каталог</a>
+        </div>
     </section>
 
+    <section id="latest-articles" class="latest-articles-section">
+        <div class="container">
+            <h2 class="section-title">Полезные статьи</h2>
+            <p class="section-subtitle">Советы по организации пространства и уходу за мебелью</p>
+            
+            <div class="articles-grid">
+                {% for article in latest_articles %}
+                <article class="article-card">
+                    <div class="article-image">
+                        <img src="{{ article.image.url }}" alt="{{ article.title }}" loading="lazy">
+                    </div>
+                    <div class="article-content">
+                        <h3 class="article-title">{{ article.title }}</h3>
+                        <div class="article-meta">
+                            <span class="article-date">{{ article.created_at|date:"d.m.Y" }}</span>
+                            <span class="article-author">Автор: {{ article.author.get_full_name }}</span>
+                        </div>
+                        <p class="article-excerpt">{{ article.short_description }}</p>
+                        <a href="{% url 'article_detail' article.slug %}" class="read-more">Читать далее →</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Существующая секция отзывов -->
     <section id="reviews" class="reviews-section">
         <h2 class="section-title">Оставить отзыв</h2>
         <form class="review-form" action="#" method="post">

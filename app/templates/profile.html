@@ -25,33 +25,30 @@
               <input type="hidden" name="add_card" value="1">
               <div class="form-row">
                 <div class="form-group">
-                  <label for="card-number">Номер карты</label>
-                  <input type="text" name="card_number" id="card-number" class="form-control"
-                         placeholder="XXXX XXXX XXXX XXXX" required
-                         value="{{ card_form.card_number.value|default_if_none:'' }}">
-                  {% if card_form.card_number.errors %}
-                    <div class="error">{{ card_form.card_number.errors }}</div>
-                  {% endif %}
+                    <input type="text" name="card_number" id="card-number" class="form-control"
+                            placeholder="XXXX XXXX XXXX XXXX" required
+                            value="{{ card_form.card_number.value|default_if_none:'' }}">
+                    {% if card_form.card_number.errors %}
+                        <div class="error">{{ card_form.card_number.errors }}</div>
+                    {% endif %}
                 </div>
                 
                 <div class="form-group">
-                  <label for="exp-date">Срок действия (MM/YY)</label>
-                  <input type="text" name="expiry_date" id="exp-date" class="form-control"
-                         placeholder="MM/YY" required
-                         value="{{ card_form.expiry_date.value|default_if_none:'' }}">
-                  {% if card_form.expiry_date.errors %} 
-                    <div class="error">{{ card_form.expiry_date.errors }}</div>
-                  {% endif %}
+                    <input type="text" name="expiry_date" id="exp-date" class="form-control"
+                            placeholder="MM/YY" required
+                            value="{{ card_form.expiry_date.value|default_if_none:'' }}">
+                    {% if card_form.expiry_date.errors %} 
+                        <div class="error">{{ card_form.expiry_date.errors }}</div>
+                    {% endif %}
                 </div>
                 
                 <div class="form-group">
-                  <label for="cvv">CVV</label>
-                  <input type="text" name="cvv" id="cvv" class="form-control"
-                         placeholder="CVV" required
-                         value="{{ card_form.cvv.value|default_if_none:'' }}">
-                  {% if card_form.cvv.errors %}
-                    <div class="error">{{ card_form.cvv.errors }}</div>
-                  {% endif %}
+                    <input type="text" name="cvv" id="cvv" class="form-control"
+                            placeholder="CVV" required
+                            value="{{ card_form.cvv.value|default_if_none:'' }}">
+                    {% if card_form.cvv.errors %}
+                        <div class="error">{{ card_form.cvv.errors }}</div>
+                    {% endif %}
                 </div>
                 <div>
                   <button type="submit" class="btn btn-primary">Добавить карту</button>
@@ -122,10 +119,48 @@
                 {% endfor %}
             </ul>
         </div>
+
+        <div class="info-card">
+            <h3>История заказов</h3>
+            {% if orders %}
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Дата заказа</th>
+                        <th>Номер заказа</th>
+                        <th>Сумма</th>
+                        <th>Карта</th>
+                        <th>Адрес</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.total_price }}₽</td>
+                        <td>{{ order.payment_card.card_number|default:"-" }}</td>
+                        <td>
+                            {% if order.delivery_address %}
+                                {{ order.delivery_address.city }}, {{ order.delivery_address.street }}, {{ order.delivery_address.house }}{% if order.delivery_address.apartment %}, кв. {{ order.delivery_address.apartment }}{% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td><button type="button" class="btn btn-secondary order-detail-btn" data-order-id="{{ order.id }}">Подробнее</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>История заказов пуста.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<div id="editModal" class="modal" style="display:none;">
+<div id="editModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeEditModal()">&times;</span>
         <h2>Изменить данные</h2>
@@ -152,4 +187,128 @@
         </form>
     </div>
 </div>
+
+<!-- Модальное окно для деталей заказа -->
+<div id="orderDetailModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="orderDetailClose">&times;</span>
+        <h2>Детали заказа</h2>
+        <p><strong>Номер заказа:</strong> <span id="modalOrderId"></span></p>
+        <p><strong>Дата заказа:</strong> <span id="modalOrderDate"></span></p>
+        <h3>Товары:</h3>
+        <ul id="modalProductList"></ul>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('orderDetailModal');
+    const closeBtn = document.getElementById('orderDetailClose');
+    const orderIdSpan = document.getElementById('modalOrderId');
+    const orderDateSpan = document.getElementById('modalOrderDate');
+    const productList = document.getElementById('modalProductList');
+
+    function openModal() {
+        modal.classList.add('show');
+    }
+
+    function closeModal() {
+        modal.classList.remove('show');
+        orderIdSpan.textContent = '';
+        orderDateSpan.textContent = '';
+        productList.innerHTML = '';
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.order-detail-btn').forEach(button => {
+        button.disabled = false;
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
+            fetch("{% url 'order_detail' %}?order_id=" + encodeURIComponent(orderId), {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                orderIdSpan.textContent = data.order_id;
+                orderDateSpan.textContent = data.created_at;
+                productList.innerHTML = '';
+                data.products.forEach(product => {
+                    const li = document.createElement('li');
+                    li.style.display = 'flex';
+                    li.style.alignItems = 'center';
+                    li.style.marginBottom = '10px';
+
+                    const img = document.createElement('img');
+                    img.src = product.image_url;
+                    img.alt = product.name;
+                    img.style.width = '50px';
+                    img.style.height = '50px';
+                    img.style.objectFit = 'cover';
+                    img.style.marginRight = '10px';
+
+                    const infoDiv = document.createElement('div');
+                    infoDiv.style.display = 'flex';
+                    infoDiv.style.flexDirection = 'column';
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = product.name;
+                    nameSpan.style.fontWeight = 'bold';
+
+                    const priceSpan = document.createElement('span');
+                    priceSpan.textContent = `Цена: ₽${product.price}`;
+
+                    const quantitySpan = document.createElement('span');
+                    quantitySpan.textContent = `Количество: ${product.quantity}`;
+
+                    infoDiv.appendChild(nameSpan);
+                    infoDiv.appendChild(priceSpan);
+                    infoDiv.appendChild(quantitySpan);
+
+                    li.appendChild(img);
+                    li.appendChild(infoDiv);
+
+                    productList.appendChild(li);
+                });
+                openModal();
+            })
+            .catch(error => {
+                alert('Ошибка при загрузке деталей заказа');
+                console.error(error);
+            });
+        });
+    });
+});
+</script>
+
 {% endblock %}

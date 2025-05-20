@@ -12,12 +12,27 @@ html {
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+@font-face {
+    font-family: 'TT';
+    src: url('../fonts/TT/TikTokSans-VF-v3.3.ttf');
+}
+
+@font-face {
+    font-family: 'Franc';
+    src: url('../fonts/Franc/System Font.ttf');
+}
+
+@font-face {
+    font-family: 'Catrinity';
+    src: url('../fonts/Catrinity/Catrinity.otf');
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 400;
+    font-family: 'TT';
+    font-weight: 500;
 }
 
 body {  
@@ -132,7 +147,7 @@ header {
     }
 }
 .nav-list.active {
-    display: flex !important;
+    display: flex;
     flex-direction: column;
     position: fixed;
     top: 0;
@@ -303,7 +318,7 @@ header {
     display: flex;
     align-items: center;
     padding: 8rem 2rem 4rem;
-    background: linear-gradient(45deg, var(--primary-color), var(--dark-color));
+    background: linear-gradient(rgba(8, 25, 49, 0.7), rgba(26, 54, 93, 0.5)), url('/static/images/1.jpg') no-repeat center center/cover;
     color: white;
     overflow: hidden;
     border-radius: 10px;
@@ -386,6 +401,221 @@ header {
 .feature-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Улучшение карточек товаров */
+.product-card {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.2);
+    border: 1px solid #3498db;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 320px;
+    max-height: 520px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    border-color: #2a4365;
+}
+
+/* Улучшение изображений товаров */
+.product-image {
+    position: relative;
+    height: 260px;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+/* Улучшение заголовков и цен */
+.product-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+.product-price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Улучшение секции статей */
+.latest-articles-section {
+    padding: 5rem 2rem;
+    background: #f0f4f8;
+    margin: 3rem 0;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.latest-articles-title {
+    text-align: center;
+    font-size: 2.25rem;
+    color: var(--primary-color);
+    margin-bottom: 2.5rem;
+    font-weight: 700;
+}
+
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.article-card {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.article-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+}
+
+.article-image {
+    height: 220px;
+    transition: box-shadow 0.3s ease;
+}
+
+.article-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.article-card:hover .article-image {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.article-content {
+    padding: 2rem;
+}
+
+.article-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.article-meta {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 1.25rem;
+}
+
+.read-more {
+    color: var(--accent-color);
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.read-more:hover {
+    color: var(--dark-color);
+}
+
+/* Улучшение секции отзывов */
+.reviews-section {
+    padding: 5rem 2rem;
+    background: #ffffff;
+    max-width: 900px;
+    margin: 4rem auto 0;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    transition: box-shadow 0.3s ease;
+}
+
+.reviews-section:hover {
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+
+.review-form .form-group {
+    margin-bottom: 1.75rem;
+}
+
+.review-form label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.review-form input[type="text"],
+.review-form textarea {
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    border: 1px solid var(--gray-color);
+    border-radius: 0.6rem;
+    font-size: 1.1rem;
+    resize: vertical;
+    background-color: #f9fbfd;
+    color: var(--text-color);
+    transition: border-color 0.3s ease;
+}
+
+.review-form input[type="text"]:focus,
+.review-form textarea:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+.review-form input[type="text"]:disabled,
+.review-form textarea:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.review-form button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.85rem 2.5rem;
+    border: none;
+    border-radius: 0.85rem;
+    font-weight: 700;
+    cursor: not-allowed;
+    opacity: 0.8;
+    transition: background-color 0.3s ease;
+}
+
+.review-form button:hover {
+    background-color: var(--dark-color);
+}
+
+.review-note {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    text-align: center;
 }
 
 .feature-icon {
@@ -486,6 +716,66 @@ header {
     margin-bottom: 1.5rem;
 }
 
+/* Стили статьи */
+/* Статьи - минимальные рабочие стили */
+.latest-articles-section {
+    padding: 4rem 2rem;
+    background: #f8fafc;
+    margin: 2rem 0;
+  }
+  
+  .latest-articles-title {
+    text-align: center;
+    font-size: 2rem;
+    color: #2A4365;
+    margin-bottom: 2rem;
+  }
+  
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .article-card {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  
+  .article-image {
+    height: 200px;
+  }
+  
+  .article-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .article-content {
+    padding: 1.5rem;
+  }
+  
+  .article-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #2A4365;
+  }
+  
+  .article-meta {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+  
+  .read-more {
+    color: #4299E1;
+    font-weight: 500;
+  }
 /* Кнопка перехода в каталог */
 .catalog-button-container {
     text-align: center;
@@ -496,7 +786,7 @@ header {
 #latest-products .product-actions,
 #latest-products .btn-details,
 #latest-products .btn-cart {
-    display: none !important;
+    display: none;
 }
 
 /* Блок отзывов */
@@ -633,11 +923,11 @@ footer {
 /* Адаптивность */
 @media (max-width: 1024px) {
     .nav-list {
-        display: none !important;
+        display: none;
     }
 
     .hamburger {
-        display: flex !important;
+        display: flex;
     }
 
     .hero-title {
@@ -676,5 +966,155 @@ footer {
     
     .cta-buttons a:hover {
         transform: translateY(-15%);
+    }
+
+    /* Responsive header */
+    header {
+        height: auto;
+        padding: 0.5rem 1rem;
+    }
+
+    .nav-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hamburger {
+        display: flex;
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-left: auto;
+    }
+
+    .nav-list {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 0;
+        margin-top: 0.5rem;
+    }
+
+    .nav-list.active {
+        display: flex;
+        position: static;
+        height: auto;
+        width: 100%;
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        overflow: visible;
+    }
+
+    .nav-list li {
+        padding: 0.5rem 0;
+    }
+
+    .nav-list li a, .dropbtn {
+        padding: 0.5rem 1rem;
+        width: 100%;
+        display: block;
+    }
+
+    .dropdown-content {
+        position: static;
+        box-shadow: none;
+        background: transparent;
+        border-radius: 0;
+        padding: 0;
+        display: none;
+    }
+
+    .nav-list li.dropdown:hover > .dropdown-content {
+        display: block;
+    }
+
+    /* Responsive footer */
+    footer {
+        padding: 2rem 1rem;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-container {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .footer-logo {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .contacts p {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .footer-nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-nav a {
+        font-size: 0.95rem;
+    }
+
+    .social-links {
+        margin-top: 1rem;
+        gap: 1rem;
+    }
+
+    .social-icon {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 0.5rem 0.5rem;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .hamburger {
+        width: 24px;
+        height: 18px;
+    }
+
+    .hamburger-line {
+        height: 2.5px;
+    }
+
+    .footer-logo {
+        font-size: 1rem;
+    }
+
+    .contacts p {
+        font-size: 0.85rem;
+    }
+
+    .footer-nav a {
+        font-size: 0.85rem;
+    }
+
+    .social-icon {
+        font-size: 1rem;
     }
 }

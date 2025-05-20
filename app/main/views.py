@@ -1,11 +1,11 @@
-from .models import Cart, CartItem, Product, CustomUser, PaymentCard
+from .models import Cart, CartItem, Product, CustomUser, PaymentCard, Material
 from .forms import RegistrationForm, AddCardForm, ProductForm, PaymentCardForm, UserProfileForm, AddressForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.views import View
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, Http404
 from django.template.loader import render_to_string
@@ -13,10 +13,18 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
 from django.utils.decorators import method_decorator
+from main.models import Article, Order, OrderItem
+from collections import Counter
 
 def home(request):
     latest_products = Product.objects.order_by('-created_at')[:6]
-    return render(request, "home.html", {'latest_products': latest_products})
+    latest_articles = Article.objects.filter(status='published').order_by('-created_at')[:3]
+    
+    context = {
+        'latest_products': latest_products,
+        'latest_articles': latest_articles,
+    }
+    return render(request, "home.html", context)
 
 def add_product(request):
     if request.method == 'POST':
@@ -93,65 +101,86 @@ class ProfileView(LoginRequiredMixin, View):
             digits_only = ''.join(filter(str.isdigit, card.card_number))
             card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
         addresses = request.user.address if request.user.address else []
-        return render(request, 'profile.html', {'card_form': card_form, 'cards': cards, 'addresses': addresses})
+
+        # Получаем историю заказов пользователя
+        orders = Order.objects.filter(user=request.user).order_by('-id')
+
+        return render(request, 'profile.html', {'card_form': card_form, 'cards': cards, 'addresses': addresses, 'orders': orders})
 
     def post(self, request):
-        if 'save_profile' in request.POST:
-            user_form = UserProfileForm(request.POST, instance=request.user)
-            card_form = PaymentCardForm()
-            if user_form.is_valid():
-                user = user_form.save()
-                # Re-authenticate user to update session with new credentials
-                update_session_auth_hash(request, user)
-                return redirect('profile')
-            cards = request.user.payment_cards.all()
-            for card in cards:
-                card.formatted_number = ' '.join([card.card_number[i:i+4] for i in range(0, len(card.card_number), 4)])
-            return render(request, 'profile.html', {'user_form': user_form, 'card_form': card_form, 'cards': cards})
-        elif 'add_card' in request.POST:
+        if 'add_card' in request.POST:
             card_form = PaymentCardForm(request.POST)
-            user_form = UserProfileForm(instance=request.user)
             if card_form.is_valid():
-                payment_card = card_form.save(commit=False)
-                payment_card.user = request.user
-                payment_card.save()
+                new_card = card_form.save(commit=False)
+                new_card.user = request.user
+                new_card.save()
                 return redirect('profile')
-            cards = request.user.payment_cards.all()
-            for card in cards:
-                card.formatted_number = ' '.join([card.card_number[i:i+4] for i in range(0, len(card.card_number), 4)])
-            return render(request, 'profile.html', {'user_form': user_form, 'card_form': card_form, 'cards': cards})
+            else:
+                cards = request.user.payment_cards.all()
+                for card in cards:
+                    digits_only = ''.join(filter(str.isdigit, card.card_number))
+                    card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
+                addresses = request.user.address if request.user.address else []
+                orders = Order.objects.filter(user=request.user).order_by('-id')
+                return render(request, 'profile.html', {'card_form': card_form, 'cards': cards, 'addresses': addresses, 'orders': orders})
         elif 'add_address' in request.POST:
             address_form = AddressForm(request.POST)
-            user_form = UserProfileForm(instance=request.user)
-            card_form = PaymentCardForm()
             if address_form.is_valid():
-                address_data = address_form.cleaned_data
                 user = request.user
-                # Получаем текущие адреса из JSONField
                 addresses = user.address if user.address else []
                 if not isinstance(addresses, list):
                     addresses = []
-                addresses.append({
-                    'city': address_data['city'],
-                    'street': address_data['street'],
-                    'house': address_data['house'],
-                    'apartment': address_data.get('apartment', '')
-                })
+                addresses.append(address_form.cleaned_data)
                 user.address = addresses
                 user.save()
                 return redirect('profile')
-            cards = request.user.payment_cards.all()
-            for card in cards:
-                card.formatted_number = ' '.join([card.card_number[i:i+4] for i in range(0, len(card.card_number), 4)])
-            return render(request, 'profile.html', {'user_form': user_form, 'card_form': card_form, 'address_form': address_form, 'cards': cards})
-        else:
-            user_form = UserProfileForm(instance=request.user)
-            card_form = PaymentCardForm()
-            address_form = AddressForm()
-            cards = request.user.payment_cards.all()
-            for card in cards:
-                card.formatted_number = ' '.join([card.card_number[i:i+4] for i in range(0, len(card.card_number), 4)])
-            return render(request, 'profile.html', {'user_form': user_form, 'card_form': card_form, 'address_form': address_form, 'cards': cards})
+            else:
+                card_form = PaymentCardForm()
+                cards = request.user.payment_cards.all()
+                for card in cards:
+                    digits_only = ''.join(filter(str.isdigit, card.card_number))
+                    card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
+                addresses = user.address if user.address else []
+                orders = Order.objects.filter(user=request.user).order_by('-id')
+                return render(request, 'profile.html', {'card_form': card_form, 'addresses': addresses, 'cards': cards, 'address_form': address_form, 'orders': orders})
+        # Handle other POST actions if any
+        return redirect('profile')
+
+@method_decorator(csrf_exempt, name='dispatch')
+class OrderDetailView(LoginRequiredMixin, View):
+    def get(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        order_id = request.GET.get('order_id')
+        if not order_id:
+            logger.error('Order ID not provided in request')
+            return JsonResponse({'error': 'Order ID not provided'}, status=400)
+        try:
+            order = Order.objects.get(id=order_id, user=request.user)
+        except Order.DoesNotExist:
+            logger.error(f'Order not found: id={order_id} for user={request.user}')
+            return JsonResponse({'error': 'Order not found'}, status=404)
+        try:
+            # Предполагается, что у заказа есть связанная модель OrderItem с количеством и продуктом
+            order_items = order.orderitem_set.select_related('product').all()
+            product_list = []
+            for item in order_items:
+                product_list.append({
+                    'name': item.product.name,
+                    'image_url': item.product.image.url if item.product.image else '',
+                    'price': str(item.product.price),
+                    'quantity': item.quantity,
+                })
+            data = {
+                'order_id': order.id,
+                'created_at': order.created_at.strftime('%d.%m.%Y %H:%M'),
+                'products': product_list,
+            }
+            return JsonResponse(data)
+        except Exception as e:
+            logger.exception(f'Error while processing order details for order id={order_id}')
+            # Временно возвращаем текст ошибки для отладки
+            return JsonResponse({'error': 'Internal server error', 'details': str(e)}, status=500)
 
 def logout_view(request):
     logout(request)
@@ -189,6 +218,9 @@ def catalog(request):
     if materials:
         products = products.filter(material__in=materials)
 
+    # Получаем все материалы для фильтрации
+    all_materials = Material.objects.all()
+
     # Пагинация - 6 товаров на страницу
     paginator = Paginator(products, 6)
     page = request.GET.get('page')
@@ -207,6 +239,7 @@ def catalog(request):
         'price_max': price_max,
         'selected_categories': categories,
         'selected_materials': materials,
+        'all_materials': all_materials,
         'page_obj': products_page,
         'paginator': paginator,
     }
@@ -220,8 +253,6 @@ def delete_product(request, product_id):
         return redirect('catalog')
     else:
         return HttpResponseForbidden("Метод не разрешен")
-
-from collections import Counter
 
 class CartContext:
     def __init__(self, items, total_price):
@@ -284,21 +315,40 @@ def order(request):
             return render(request, 'order.html', {'cart': cart_obj, 'cards': cards, 'addresses': addresses, 'error_message': error_message})
         # Calculate total price
         total_price = 0
-        products = []
-        for item in cart.items.select_related('product').all():
-            total_price += item.product.price * item.quantity
-            products.append(item.product)
         # Create order
+        # delivery_address должен быть словарем, а не объектом
+        delivery_address_data = None
+        if selected_address:
+            if isinstance(selected_address, dict):
+                delivery_address_data = selected_address
+            else:
+                # Преобразуем объект адреса в словарь, если нужно
+                delivery_address_data = {
+                    'city': getattr(selected_address, 'city', ''),
+                    'street': getattr(selected_address, 'street', ''),
+                    'house': getattr(selected_address, 'house', ''),
+                    'apartment': getattr(selected_address, 'apartment', ''),
+                }
         order = Order.objects.create(
             user=user,
-            total_price=total_price,
+            total_price=0,
             payment_card=selected_card,
-            delivery_address=selected_address
+            delivery_address=delivery_address_data
         )
-        order.products.set(products)
+        total_price = 0
+        for item in cart.items.select_related('product').all():
+            total_price += item.product.price * item.quantity
+            # Создаем OrderItem для каждого товара
+            order_item = OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity
+            )
+        order.total_price = total_price
+        order.save()
         # Clear cart
         cart.items.all().delete()
-        return redirect('order_confirmation', order_id=order.id)
+        return redirect('profile')
     else:
         items = []
         total_price = 0
@@ -318,10 +368,22 @@ def order(request):
         addresses = user.address if user.address else []
         return render(request, 'order.html', {'cart': cart_obj, 'cards': cards, 'addresses': addresses})
 
+@require_POST
+@login_required
+def remove_from_cart(request, product_id):
+    user = request.user
+    cart = Cart.objects.filter(user=user).first()
+    if not cart:
+        return JsonResponse({'success': False, 'error': 'Корзина не найдена'})
 
+    try:
+        cart_item = CartItem.objects.get(cart=cart, product_id=product_id)
+        cart_item.delete()
+        return JsonResponse({'success': True})
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Товар не найден в корзине'})
 
 @require_http_methods(["POST"])
-# Убрали csrf_exempt для проверки CSRF защиты
 def update_cart_item_quantity(request, product_id):
     import logging
     logger = logging.getLogger(__name__)
@@ -369,9 +431,9 @@ def product_modal(request, product_id):
         'name': product.name,
         'description': product.description,
         'price': str(product.price),
-        'material': product.material,
+        'material': product.material.name if product.material else '',
         'category_display': product.get_category_display(),
-        'dimensions': product.dimensions,
+        'dimensions': product.dimensions if product.dimensions else '',
         'image_url': product.image.url if product.image else '',
     }
     return JsonResponse(product_data)
@@ -410,3 +472,7 @@ def delete_address(request, index):
             return HttpResponseForbidden("Неверный индекс адреса")
     else:
         return HttpResponseForbidden("Метод не разрешен")
+
+def article_detail(request, slug):
+    article = get_object_or_404(Article, slug=slug, status='published')
+    return render(request, 'article_detail.html', {'article': article})

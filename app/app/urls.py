@@ -22,7 +22,10 @@ urlpatterns = [
     path('delete_product/<int:product_id>/', views.delete_product, name='delete_product'),
     path('add_to_cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('update_cart_item_quantity/<int:product_id>/', views.update_cart_item_quantity, name='update_cart_item_quantity'),
+    path('remove_from_cart/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('product/<int:product_id>/modal/', views.product_modal, name='product_modal'),
+    path('articles/<slug:slug>/', views.article_detail, name='article_detail'),
+    path('order_detail/', views.OrderDetailView.as_view(), name='order_detail'),
 ]
 
 if settings.DEBUG:
