@@ -8,13 +8,17 @@
     <title>{% block title %}StyleStorage{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles/base.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/reviews.css' %}">
     <link rel="stylesheet" href="{% static 'fontawesome-free-6.4.0-web/css/all.min.css' %}">
 </head>
 <body>
+    
     <header>
         <div class="nav-container">
             <div class="logo">
-                <a href="{% url 'home' %}">StyleStorage</a>
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'images/logo.png' %}" alt="">
+                </a>
             </div>
             <button class="hamburger" aria-label="Toggle navigation" id="hamburgerBtn">
                 <span class="hamburger-line"></span>
@@ -96,8 +100,8 @@
                 </div>
                 <div class="contacts">
                     <p><i class="fas fa-phone"></i> +7 (495) 123-45-67</p>
-                    <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Мебельная, 12</p>
-                    <p><i class="fas fa-envelope"></i> info@elitecloset.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Ижевск, Пушкинская 292/1, 16</p>
+                    <p><i class="fas fa-envelope"></i> stylestorage@example.com</p>
                 </div>
             </div>
             

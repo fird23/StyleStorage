@@ -247,7 +247,7 @@
 
 /* Modal styles */
 .modal {
-    display: none; /* Hidden by default */
+    display: none; /* Важно: по умолчанию скрыто */
     position: fixed;
     z-index: 1200;
     left: 0;
@@ -258,7 +258,6 @@
     background-color: rgba(0,0,0,0.75);
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
-    display: flex;
     justify-content: center;
     align-items: center;
     padding: 2rem;
@@ -270,6 +269,7 @@
 }
 
 .modal.show {
+    display: flex;
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);

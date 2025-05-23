@@ -1,0 +1,35 @@
+.reviews-list{
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: 0 auto;
+    gap: 50px;
+    padding: 50px 0 50px 0;
+}
+
+.review-item{
+    background-color: white;
+    padding: 30px 20px;
+    border-radius: 5px;
+    position: relative;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.review-author{
+    font-style: italic;
+}
+
+.review-actions{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+
+    i{
+        font-size: 14px;
+        transition: all 0.1s;
+    }
+
+    i:hover{
+        color: rgb(135, 135, 135);
+    }
+}

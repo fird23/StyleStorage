@@ -2,6 +2,7 @@ from django.db import models
 from .user import CustomUser
 from .product import Product
 from .payment import PaymentCard
+from django.dispatch import receiver
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -29,3 +30,8 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name} x {self.quantity} (Заказ #{self.order.id})"
+    
+class Meta:
+    verbose_name = 'Заказы'
+    verbose_name_plural = 'Заказы'
+    ordering = ['name']

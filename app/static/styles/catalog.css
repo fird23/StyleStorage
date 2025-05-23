@@ -250,7 +250,7 @@
 }
 
 .apply-btn {
-    background-color: #3498db;
+    background-color: var(--dark-color);
     color: white;
     border: none;
     padding: 0.9rem 1.5rem;
@@ -260,6 +260,7 @@
     transition: background-color 0.3s ease;
     width: 100%;
     margin-top: 1rem;
+    font-size: 15px;
 }
 
 .apply-btn:hover {

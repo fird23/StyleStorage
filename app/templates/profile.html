@@ -9,7 +9,7 @@
         <h1>Ваш профиль</h1>
         <button class="btn btn-primary" onclick="openEditModal()">Изменить данные</button>
     </div>
-
+ 
     <div class="profile-info">
         <div class="info-card">
             <h3>Основная информация</h3>
@@ -201,114 +201,145 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('orderDetailModal');
-    const closeBtn = document.getElementById('orderDetailClose');
-    const orderIdSpan = document.getElementById('modalOrderId');
-    const orderDateSpan = document.getElementById('modalOrderDate');
-    const productList = document.getElementById('modalProductList');
-
-    function openModal() {
-        modal.classList.add('show');
-    }
-
-    function closeModal() {
-        modal.classList.remove('show');
-        orderIdSpan.textContent = '';
-        orderDateSpan.textContent = '';
-        productList.innerHTML = '';
-    }
-
-    closeBtn.addEventListener('click', closeModal);
-
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeModal();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация модальных окон - гарантированно скрываем при загрузке
+        const editModal = document.getElementById('editModal');
+        const orderModal = document.getElementById('orderDetailModal');
+        
+        // Сразу скрываем оба модальных окна
+        editModal.style.display = 'none';
+        orderModal.style.display = 'none';
+        
+        // Удаляем возможные классы, которые могли остаться
+        editModal.classList.remove('show');
+        orderModal.classList.remove('show');
+    
+        // Функции для модального окна редактирования
+        function openEditModal() {
+            editModal.style.display = 'flex';
+            setTimeout(() => {
+                editModal.classList.add('show');
+            }, 10);
         }
-    });
-
-    document.querySelectorAll('.order-detail-btn').forEach(button => {
-        button.disabled = false;
-        button.addEventListener('click', function() {
-            const orderId = this.getAttribute('data-order-id');
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        // Does this cookie string begin with the name we want?
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
+        
+        function closeEditModal() {
+            editModal.classList.remove('show');
+            setTimeout(() => {
+                editModal.style.display = 'none';
+            }, 300);
+        }
+    
+        // Функции для модального окна заказа
+        function openOrderModal() {
+            orderModal.style.display = 'flex';
+            setTimeout(() => {
+                orderModal.classList.add('show');
+            }, 10);
+        }
+    
+        function closeOrderModal() {
+            orderModal.classList.remove('show');
+            setTimeout(() => {
+                orderModal.style.display = 'none';
+                document.getElementById('modalOrderId').textContent = '';
+                document.getElementById('modalOrderDate').textContent = '';
+                document.getElementById('modalProductList').innerHTML = '';
+            }, 300);
+        }
+    
+        // Обработчики закрытия
+        document.querySelectorAll('.close').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.closest('#editModal')) closeEditModal();
+                if (this.closest('#orderDetailModal')) closeOrderModal();
+            });
+        });
+    
+        // Закрытие по клику вне модального окна
+        window.addEventListener('click', function(event) {
+            if (event.target === editModal) closeEditModal();
+            if (event.target === orderModal) closeOrderModal();
+        });
+    
+        // Обработчики для кнопок
+        document.querySelector('.profile-header button')?.addEventListener('click', openEditModal);
+    
+        // Обработчики для кнопок "Подробнее" о заказе
+        document.querySelectorAll('.order-detail-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order-id');
+                
+                function getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
                         }
                     }
+                    return cookieValue;
                 }
-                return cookieValue;
-            }
-            const csrftoken = getCookie('csrftoken');
-
-            fetch("{% url 'order_detail' %}?order_id=" + encodeURIComponent(orderId), {
-                method: 'GET',
-                headers: {
-                    'X-CSRFToken': csrftoken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-                orderIdSpan.textContent = data.order_id;
-                orderDateSpan.textContent = data.created_at;
-                productList.innerHTML = '';
-                data.products.forEach(product => {
-                    const li = document.createElement('li');
-                    li.style.display = 'flex';
-                    li.style.alignItems = 'center';
-                    li.style.marginBottom = '10px';
-
-                    const img = document.createElement('img');
-                    img.src = product.image_url;
-                    img.alt = product.name;
-                    img.style.width = '50px';
-                    img.style.height = '50px';
-                    img.style.objectFit = 'cover';
-                    img.style.marginRight = '10px';
-
-                    const infoDiv = document.createElement('div');
-                    infoDiv.style.display = 'flex';
-                    infoDiv.style.flexDirection = 'column';
-
-                    const nameSpan = document.createElement('span');
-                    nameSpan.textContent = product.name;
-                    nameSpan.style.fontWeight = 'bold';
-
-                    const priceSpan = document.createElement('span');
-                    priceSpan.textContent = `Цена: ₽${product.price}`;
-
-                    const quantitySpan = document.createElement('span');
-                    quantitySpan.textContent = `Количество: ${product.quantity}`;
-
-                    infoDiv.appendChild(nameSpan);
-                    infoDiv.appendChild(priceSpan);
-                    infoDiv.appendChild(quantitySpan);
-
-                    li.appendChild(img);
-                    li.appendChild(infoDiv);
-
-                    productList.appendChild(li);
+                
+                const csrftoken = getCookie('csrftoken');
+    
+                fetch("{% url 'order_detail' %}?order_id=" + encodeURIComponent(orderId), {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    
+                    document.getElementById('modalOrderId').textContent = data.order_id;
+                    document.getElementById('modalOrderDate').textContent = data.created_at;
+                    const productList = document.getElementById('modalProductList');
+                    productList.innerHTML = '';
+                    
+                    data.products.forEach(product => {
+                        const li = document.createElement('li');
+                        li.style.cssText = 'display: flex; align-items: center; margin-bottom: 10px;';
+    
+                        const img = document.createElement('img');
+                        img.src = product.image_url;
+                        img.alt = product.name;
+                        img.style.cssText = 'width: 50px; height: 50px; object-fit: cover; margin-right: 10px;';
+    
+                        const infoDiv = document.createElement('div');
+                        infoDiv.style.display = 'flex';
+                        infoDiv.style.flexDirection = 'column';
+    
+                        ['name', 'price', 'quantity'].forEach(field => {
+                            const span = document.createElement('span');
+                            span.textContent = field === 'name' ? product[field] : 
+                                              field === 'price' ? `Цена: ₽${product[field]}` : 
+                                              `Количество: ${product[field]}`;
+                            if (field === 'name') span.style.fontWeight = 'bold';
+                            infoDiv.appendChild(span);
+                        });
+    
+                        li.appendChild(img);
+                        li.appendChild(infoDiv);
+                        productList.appendChild(li);
+                    });
+                    
+                    openOrderModal();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(error.message);
                 });
-                openModal();
-            })
-            .catch(error => {
-                alert('Ошибка при загрузке деталей заказа');
-                console.error(error);
             });
         });
     });
-});
-</script>
-
+    </script>
 {% endblock %}

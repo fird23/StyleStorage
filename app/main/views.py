@@ -1,5 +1,5 @@
 from .models import Cart, CartItem, Product, CustomUser, PaymentCard, Material
-from .forms import RegistrationForm, AddCardForm, ProductForm, PaymentCardForm, UserProfileForm, AddressForm
+from .forms import RegistrationForm, AddCardForm, ProductForm, PaymentCardForm, UserProfileForm, AddressForm, ReviewForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.views import View
@@ -13,10 +13,12 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
 from django.utils.decorators import method_decorator
-from main.models import Article, Order, OrderItem
+from main.models import Article, Order, OrderItem, CustomUser, Review
 from collections import Counter
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def home(request):
+    latest_reviews = Review.objects.filter(is_published=True).order_by('-created_at')[:3]
     latest_products = Product.objects.order_by('-created_at')[:6]
     latest_articles = Article.objects.filter(status='published').order_by('-created_at')[:3]
     
@@ -24,7 +26,7 @@ def home(request):
         'latest_products': latest_products,
         'latest_articles': latest_articles,
     }
-    return render(request, "home.html", context)
+    return render(request, 'home.html', {'latest_reviews': latest_reviews})
 
 def add_product(request):
     if request.method == 'POST':
@@ -88,63 +90,78 @@ class CustomLoginView(View):
 
         # Если не найден или пароль неверный
         return render(request, 'login.html', {'error': 'Неверные данные'})
-
+    
 class ProfileView(LoginRequiredMixin, View):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
 
     def get(self, request):
-        card_form = PaymentCardForm()
-        cards = request.user.payment_cards.all()
-        # Добавим форматирование номера карты для отображения
-        for card in cards:
-            digits_only = ''.join(filter(str.isdigit, card.card_number))
-            card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
-        addresses = request.user.address if request.user.address else []
-
-        # Получаем историю заказов пользователя
-        orders = Order.objects.filter(user=request.user).order_by('-id')
-
-        return render(request, 'profile.html', {'card_form': card_form, 'cards': cards, 'addresses': addresses, 'orders': orders})
+        # Подготовка данных для GET-запроса
+        context = self._prepare_context()
+        return render(request, 'profile.html', context)
 
     def post(self, request):
+        user = request.user  # Сохраняем пользователя в переменную
+        
+        # Обработка добавления карты
         if 'add_card' in request.POST:
             card_form = PaymentCardForm(request.POST)
             if card_form.is_valid():
                 new_card = card_form.save(commit=False)
-                new_card.user = request.user
+                new_card.user = user
                 new_card.save()
                 return redirect('profile')
-            else:
-                cards = request.user.payment_cards.all()
-                for card in cards:
-                    digits_only = ''.join(filter(str.isdigit, card.card_number))
-                    card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
-                addresses = request.user.address if request.user.address else []
-                orders = Order.objects.filter(user=request.user).order_by('-id')
-                return render(request, 'profile.html', {'card_form': card_form, 'cards': cards, 'addresses': addresses, 'orders': orders})
+            
+            # Если форма невалидна
+            context = self._prepare_context(card_form=card_form)
+            return render(request, 'profile.html', context)
+
+        # Обработка добавления адреса
         elif 'add_address' in request.POST:
             address_form = AddressForm(request.POST)
             if address_form.is_valid():
-                user = request.user
-                addresses = user.address if user.address else []
-                if not isinstance(addresses, list):
-                    addresses = []
+                addresses = getattr(user, 'address', []) or []
                 addresses.append(address_form.cleaned_data)
                 user.address = addresses
                 user.save()
                 return redirect('profile')
-            else:
-                card_form = PaymentCardForm()
-                cards = request.user.payment_cards.all()
-                for card in cards:
-                    digits_only = ''.join(filter(str.isdigit, card.card_number))
-                    card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
-                addresses = user.address if user.address else []
-                orders = Order.objects.filter(user=request.user).order_by('-id')
-                return render(request, 'profile.html', {'card_form': card_form, 'addresses': addresses, 'cards': cards, 'address_form': address_form, 'orders': orders})
-        # Handle other POST actions if any
+            
+            # Если форма невалидна
+            context = self._prepare_context(address_form=address_form)
+            return render(request, 'profile.html', context)
+
         return redirect('profile')
+
+    def _prepare_context(self, card_form=None, address_form=None):
+        """Вспомогательный метод для подготовки контекста"""
+        user = self.request.user
+        
+        # Если формы не переданы, создаем пустые
+        if card_form is None:
+            card_form = PaymentCardForm()
+        if address_form is None:
+            address_form = AddressForm()
+        
+        # Подготавливаем данные карт
+        cards = user.payment_cards.all()
+        for card in cards:
+            digits_only = ''.join(filter(str.isdigit, card.card_number))
+            card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
+        
+        # Получаем адреса
+        addresses = getattr(user, 'address', []) or []
+        
+        # Получаем заказы
+        orders = Order.objects.filter(user=user).order_by('-id')
+
+        return {
+            'card_form': card_form,
+            'address_form': address_form,
+            'cards': cards,
+            'addresses': addresses,
+            'orders': orders,
+            'user': user
+        }
 
 @method_decorator(csrf_exempt, name='dispatch')
 class OrderDetailView(LoginRequiredMixin, View):
@@ -476,3 +493,28 @@ def delete_address(request, index):
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug, status='published')
     return render(request, 'article_detail.html', {'article': article})
+
+def all_reviews(request):
+    # Все опубликованные отзывы
+    reviews = Review.objects.filter(is_published=True).order_by('-created_at')
+    return render(request, 'all_reviews.html', {'reviews': reviews})
+
+@login_required
+def manage_review(request):
+    # Получаем отзыв пользователя (если есть)
+    user_review = Review.objects.filter(user=request.user).first()
+    
+    if request.method == 'POST':
+        form = ReviewForm(request.POST, instance=user_review)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.save()
+            return redirect('home')
+    else:
+        form = ReviewForm(instance=user_review)
+    
+    return render(request, 'manage_review.html', {
+        'form': form,
+        'user_review': user_review
+    })

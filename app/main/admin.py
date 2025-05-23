@@ -1,5 +1,5 @@
 from django.contrib import admin
-from main.models import Product, Order, Article, Material
+from main.models import Product, Order, Article, Material, Contacts, Review
 from django.utils.html import format_html
 from django import forms
 
@@ -71,3 +71,15 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
 
 admin.site.register(Material, MaterialAdmin)
+
+@admin.register(Contacts)
+class ContactsAdmin(admin.ModelAdmin):
+    list_display = ('address','phone')
+    list_filter = ('address', 'phone')
+    search_fields = ('address', 'phone')
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('user', 'text', 'created_at')
+    list_filter = ('user', 'created_at')
+    search_fields = ('user', 'created_at')

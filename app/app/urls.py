@@ -2,8 +2,8 @@ from main import views
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-from main.views import CustomLoginView
 from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +26,9 @@ urlpatterns = [
     path('product/<int:product_id>/modal/', views.product_modal, name='product_modal'),
     path('articles/<slug:slug>/', views.article_detail, name='article_detail'),
     path('order_detail/', views.OrderDetailView.as_view(), name='order_detail'),
+    path('', views.home, name='home'),
+    path('reviews/', views.all_reviews, name='all_reviews'),
+    path('reviews/manage/', views.manage_review, name='manage_review'),
 ]
 
 if settings.DEBUG:

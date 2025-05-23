@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% if user_review %}Редактировать отзыв{% else %}Оставить отзыв{% endif %}</h1>
+
+<form method="post" class="review-form">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ form.text.label_tag }}
+        {{ form.text }}
+        {{ form.text.errors }}
+    </div>
+    <button type="submit" class="btn">
+        {% if user_review %}Обновить отзыв{% else %}Отправить отзыв{% endif %}
+    </button>
+    <a href="{% if user_review %}{% url 'all_reviews' %}{% else %}{% url 'home' %}{% endif %}" class="btn">Отмена</a>
+</form>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser, Product, Order, PaymentCard
+from .models import CustomUser, Product, Order, PaymentCard, Review
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 
@@ -99,3 +99,14 @@ class AddressForm(forms.Form):
     street = forms.CharField(max_length=100, required=True, label='Улица')
     house = forms.CharField(max_length=20, required=True, label='Дом')
     apartment = forms.CharField(max_length=20, required=False, label='Квартира')
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'rows': 4,
+                'placeholder': 'Напишите ваш отзыв здесь...'
+            }),
+        }
