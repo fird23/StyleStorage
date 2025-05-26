@@ -1,6 +1,6 @@
 /* Стили для страницы "О компании" */
 .about-hero {
-    padding: 8rem 0 4rem;
+    padding: 8rem 2rem 4rem;
     background: var(--light-color);
 }
 

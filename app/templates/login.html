@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <link rel="stylesheet" href="{% static 'styles/reg.css' %}">
 
 <div class="form-container">
@@ -12,7 +13,7 @@
     <form method="post" class="form-reg">
         {% csrf_token %}
         <div class="form-group">
-            <label>Email или телефон:</label>
+            <label>Email:</label>
             <input type="text" name="username" required class="form-control" id="login-input">
         </div>
         <div class="form-group">

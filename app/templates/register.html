@@ -7,7 +7,20 @@
 <div class="form-container">
     <h2>Регистрация</h2>
     <form method="post" class="form-reg">
+
+
         {% csrf_token %}
+        
+        <!-- Общие ошибки -->
+        {% if form.errors %}
+            <div class="form-errors">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
         <div class="form-group">
             <label>Имя пользователя:</label>
             <input type="text" name="username" required class="form-control">

@@ -1,21 +1,20 @@
 from .models import Cart, CartItem, Product, CustomUser, PaymentCard, Material
-from .forms import RegistrationForm, AddCardForm, ProductForm, PaymentCardForm, UserProfileForm, AddressForm, ReviewForm
+from .forms import RegistrationForm, ProductForm, PaymentCardForm, AddressForm, ReviewForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.views import View
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse, Http404
-from django.template.loader import render_to_string
+from django.http import Http404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
+from django.views.decorators.csrf import csrf_exempt 
 from django.utils.decorators import method_decorator
-from main.models import Article, Order, OrderItem, CustomUser, Review
-from collections import Counter
+from main.models import Article, Order, OrderItem, CustomUser, Review, Contacts
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.admin.views.decorators import staff_member_required
 
 def home(request):
     latest_reviews = Review.objects.filter(is_published=True).order_by('-created_at')[:3]
@@ -25,8 +24,9 @@ def home(request):
     context = {
         'latest_products': latest_products,
         'latest_articles': latest_articles,
+        'latest_reviews': latest_reviews,
     }
-    return render(request, 'home.html', {'latest_reviews': latest_reviews})
+    return render(request, 'home.html', context)
 
 def add_product(request):
     if request.method == 'POST':
@@ -56,149 +56,92 @@ class CustomLoginView(View):
         return render(request, 'login.html')
 
     def post(self, request):
-        input_username = request.POST.get('username')
+        email = request.POST.get('username')  
         password = request.POST.get('password')
 
-        user_obj = None
-
-        # Попытка найти пользователя по email
         try:
-            user_obj = CustomUser.objects.get(email=input_username)
-        except CustomUser.DoesNotExist:
-            user_obj = None
-
-        # Если не найден по email, пытаемся по телефону
-        if not user_obj:
-            if any(c.isdigit() for c in input_username):
-                digits = ''.join(filter(str.isdigit, input_username))
-                if digits.startswith('8'):
-                    digits = '7' + digits[1:]
-                if digits.startswith('9'):
-                    digits = '7' + digits
-                phone_normalized = f'+7{digits[1:11]}'
-                try:
-                    user_obj = CustomUser.objects.get(phone=phone_normalized)
-                except CustomUser.DoesNotExist:
-                    user_obj = None
-
-        # Если пользователь найден, используем его username для аутентификации
-        if user_obj:
-            user = authenticate(username=user_obj.username, password=password)
-            if user:
-                login(request, user)
+            user = CustomUser.objects.get(email=email)
+            
+            auth_user = authenticate(username=user.username, password=password)
+            if auth_user:
+                login(request, auth_user)
                 return redirect('profile')
+        except CustomUser.DoesNotExist:
+            pass  
 
-        # Если не найден или пароль неверный
-        return render(request, 'login.html', {'error': 'Неверные данные'})
-    
+        return render(request, 'login.html', {'error': 'Неверный email или пароль'})
+        
 class ProfileView(LoginRequiredMixin, View):
-    login_url = '/login/'
-    redirect_field_name = 'redirect_to'
-
+    
     def get(self, request):
-        # Подготовка данных для GET-запроса
-        context = self._prepare_context()
+        context = {
+            'card_form': PaymentCardForm(),
+            'address_form': AddressForm(),
+            'cards': self._get_formatted_cards(request),
+            'addresses': request.user.address or [],
+            'orders': Order.objects.filter(user=request.user).order_by('-id')
+        }
         return render(request, 'profile.html', context)
 
     def post(self, request):
-        user = request.user  # Сохраняем пользователя в переменную
+        form_type = 'card' if 'add_card' in request.POST else 'address'
+        form = PaymentCardForm(request.POST) if form_type == 'card' else AddressForm(request.POST)
         
-        # Обработка добавления карты
-        if 'add_card' in request.POST:
-            card_form = PaymentCardForm(request.POST)
-            if card_form.is_valid():
-                new_card = card_form.save(commit=False)
-                new_card.user = user
-                new_card.save()
-                return redirect('profile')
-            
-            # Если форма невалидна
-            context = self._prepare_context(card_form=card_form)
-            return render(request, 'profile.html', context)
-
-        # Обработка добавления адреса
-        elif 'add_address' in request.POST:
-            address_form = AddressForm(request.POST)
-            if address_form.is_valid():
-                addresses = getattr(user, 'address', []) or []
-                addresses.append(address_form.cleaned_data)
-                user.address = addresses
-                user.save()
-                return redirect('profile')
-            
-            # Если форма невалидна
-            context = self._prepare_context(address_form=address_form)
-            return render(request, 'profile.html', context)
-
-        return redirect('profile')
-
-    def _prepare_context(self, card_form=None, address_form=None):
-        """Вспомогательный метод для подготовки контекста"""
-        user = self.request.user
+        if form.is_valid():
+            if form_type == 'card':
+                card = form.save(commit=False)
+                card.user = request.user
+                card.save()
+            else:
+                addresses = request.user.address or []
+                addresses.append(form.cleaned_data)
+                request.user.address = addresses
+                request.user.save()
+            return redirect('profile')
         
-        # Если формы не переданы, создаем пустые
-        if card_form is None:
-            card_form = PaymentCardForm()
-        if address_form is None:
-            address_form = AddressForm()
-        
-        # Подготавливаем данные карт
-        cards = user.payment_cards.all()
+        # Если форма невалидна
+        context = self.get(request).context_data
+        if form_type == 'card':
+            context['card_form'] = form
+        else:
+            context['address_form'] = form
+        return render(request, 'profile.html', context)
+
+    def _get_formatted_cards(self, request):
+        cards = request.user.payment_cards.all()
         for card in cards:
-            digits_only = ''.join(filter(str.isdigit, card.card_number))
-            card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
-        
-        # Получаем адреса
-        addresses = getattr(user, 'address', []) or []
-        
-        # Получаем заказы
-        orders = Order.objects.filter(user=user).order_by('-id')
+            digits = ''.join(filter(str.isdigit, card.card_number))
+            card.formatted_number = ' '.join([digits[i:i+4] for i in range(0, len(digits), 4)])
+        return cards
 
-        return {
-            'card_form': card_form,
-            'address_form': address_form,
-            'cards': cards,
-            'addresses': addresses,
-            'orders': orders,
-            'user': user
-        }
 
-@method_decorator(csrf_exempt, name='dispatch')
 class OrderDetailView(LoginRequiredMixin, View):
     def get(self, request):
-        import logging
-        logger = logging.getLogger(__name__)
         order_id = request.GET.get('order_id')
         if not order_id:
-            logger.error('Order ID not provided in request')
-            return JsonResponse({'error': 'Order ID not provided'}, status=400)
+            return JsonResponse({'error': 'Order ID required'}, status=400)
+
         try:
             order = Order.objects.get(id=order_id, user=request.user)
-        except Order.DoesNotExist:
-            logger.error(f'Order not found: id={order_id} for user={request.user}')
-            return JsonResponse({'error': 'Order not found'}, status=404)
-        try:
-            # Предполагается, что у заказа есть связанная модель OrderItem с количеством и продуктом
-            order_items = order.orderitem_set.select_related('product').all()
-            product_list = []
-            for item in order_items:
-                product_list.append({
-                    'name': item.product.name,
-                    'image_url': item.product.image.url if item.product.image else '',
-                    'price': str(item.product.price),
-                    'quantity': item.quantity,
-                })
-            data = {
+            items = order.orderitem_set.select_related('product').values(
+                'product__name',
+                'product__image',
+                'product__price',
+                'quantity'
+            )
+            
+            return JsonResponse({
                 'order_id': order.id,
                 'created_at': order.created_at.strftime('%d.%m.%Y %H:%M'),
-                'products': product_list,
-            }
-            return JsonResponse(data)
+                'products': list(items)
+            })
+            
+        except Order.DoesNotExist:
+            return JsonResponse({'error': 'Order not found'}, status=404)
         except Exception as e:
-            logger.exception(f'Error while processing order details for order id={order_id}')
-            # Временно возвращаем текст ошибки для отладки
-            return JsonResponse({'error': 'Internal server error', 'details': str(e)}, status=500)
-
+            return JsonResponse({'error': 'Server error'}, status=500)
+        
+    
 def logout_view(request):
     logout(request)
     return redirect("home")
@@ -209,7 +152,6 @@ def about(request):
 def catalog(request):
     products = Product.objects.all()
 
-    # Получение параметров фильтрации из GET-запроса
     search_query = request.GET.get('search', '')
     price_min = request.GET.get('price_min')
     price_max = request.GET.get('price_max')
@@ -262,7 +204,7 @@ def catalog(request):
     }
     return render(request, 'catalog.html', context)
 
-@user_passes_test(lambda u: u.is_staff)
+@staff_member_required
 def delete_product(request, product_id):
     if request.method == 'POST':
         product = get_object_or_404(Product, id=product_id)
@@ -292,98 +234,68 @@ def add_to_cart(request, product_id):
         cart_item.save()
     return JsonResponse({'success': True, 'cart_count': sum(item.quantity for item in cart.items.all())})
 
+@login_required
 def order(request):
-    user = request.user
-    if not user.is_authenticated:
-        return redirect('login')
-    cart, created = Cart.objects.get_or_create(user=user)
+    cart = request.user.cart
     if request.method == 'POST':
-        card_id = request.POST.get('payment_card')
-        address_index = request.POST.get('delivery_address')
-        cards = user.payment_cards.all()
-        addresses = user.address if user.address else []
-        # Validate card
+        # Получаем выбранные карту и адрес
+        card = request.user.payment_cards.filter(id=request.POST.get('payment_card')).first()
         try:
-            selected_card = cards.get(id=card_id)
-        except (PaymentCard.DoesNotExist, ValueError, TypeError):
-            selected_card = None
-        # Validate address
-        try:
-            address_index = int(address_index)
-            if 0 <= address_index < len(addresses):
-                selected_address = addresses[address_index]
-            else:
-                selected_address = None
+            address_index = int(request.POST.get('delivery_address'))
+            address = request.user.address[address_index] if 0 <= address_index < len(request.user.address or []) else None
         except (ValueError, TypeError):
-            selected_address = None
-        if not selected_card or not selected_address:
-            items = []
-            total_price = 0
-            for item in cart.items.select_related('product').all():
-                item_total_price = float(item.product.price) * item.quantity
-                items.append({
-                    'product': item.product,
-                    'quantity': item.quantity,
-                    'item_total_price': item_total_price,
-                })
-                total_price += item_total_price
-            cart_obj = CartContext(items, total_price)
-            error_message = "Пожалуйста, выберите корректную карту и адрес доставки."
-            return render(request, 'order.html', {'cart': cart_obj, 'cards': cards, 'addresses': addresses, 'error_message': error_message})
-        # Calculate total price
-        total_price = 0
-        # Create order
-        # delivery_address должен быть словарем, а не объектом
-        delivery_address_data = None
-        if selected_address:
-            if isinstance(selected_address, dict):
-                delivery_address_data = selected_address
-            else:
-                # Преобразуем объект адреса в словарь, если нужно
-                delivery_address_data = {
-                    'city': getattr(selected_address, 'city', ''),
-                    'street': getattr(selected_address, 'street', ''),
-                    'house': getattr(selected_address, 'house', ''),
-                    'apartment': getattr(selected_address, 'apartment', ''),
-                }
-        order = Order.objects.create(
-            user=user,
-            total_price=0,
-            payment_card=selected_card,
-            delivery_address=delivery_address_data
-        )
-        total_price = 0
-        for item in cart.items.select_related('product').all():
-            total_price += item.product.price * item.quantity
-            # Создаем OrderItem для каждого товара
-            order_item = OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity
-            )
-        order.total_price = total_price
-        order.save()
-        # Clear cart
-        cart.items.all().delete()
+            address = None
+
+        if not card or not address:
+            return render_order_page(request, cart, error="Пожалуйста, выберите корректную карту и адрес доставки")
+
+        # Создаем заказ
+        order = create_order(request.user, cart, card, address)
+        cart.items.all().delete()  # Очищаем корзину
         return redirect('profile')
-    else:
-        items = []
-        total_price = 0
-        for item in cart.items.select_related('product').all():
-            item_total_price = item.product.price * item.quantity
-            items.append({
-                'product': item.product,
-                'quantity': item.quantity,
-                'item_total_price': item_total_price,
-            })
-            total_price += item_total_price
-        cart_obj = CartContext(items, total_price)
-        cards = user.payment_cards.all()
-        for card in cards:
-            digits_only = ''.join(filter(str.isdigit, card.card_number))
-            card.formatted_number = ' '.join([digits_only[i:i+4] for i in range(0, len(digits_only), 4)])
-        addresses = user.address if user.address else []
-        return render(request, 'order.html', {'cart': cart_obj, 'cards': cards, 'addresses': addresses})
+
+    return render_order_page(request, cart)
+
+# Вспомогательные функции
+def render_order_page(request, cart, error=None):
+    items = [{
+        'product': item.product,
+        'quantity': item.quantity,
+        'item_total_price': item.product.price * item.quantity
+    } for item in cart.items.select_related('product')]
+
+    cards = request.user.payment_cards.all()
+    for card in cards:
+        digits = ''.join(filter(str.isdigit, card.card_number))
+        card.formatted_number = ' '.join([digits[i:i+4] for i in range(0, len(digits), 4)])
+
+    return render(request, 'order.html', {
+        'cart': {'items': items, 'total_price': sum(i['item_total_price'] for i in items)},
+        'cards': cards,
+        'addresses': request.user.address or [],
+        'error_message': error
+    })
+
+def create_order(user, cart, card, address):
+    order = Order.objects.create(
+        user=user,
+        payment_card=card,
+        delivery_address=address if isinstance(address, dict) else address.__dict__,
+        total_price=0
+    )
+    
+    total = 0
+    for item in cart.items.select_related('product'):
+        OrderItem.objects.create(
+            order=order,
+            product=item.product,
+            quantity=item.quantity
+        )
+        total += item.product.price * item.quantity
+    
+    order.total_price = total
+    order.save()
+    return order
 
 @require_POST
 @login_required
@@ -456,7 +368,12 @@ def product_modal(request, product_id):
     return JsonResponse(product_data)
 
 def contacts(request):
-    return render(request, 'contacts.html')
+    adress = Contacts.objects.all()
+    
+    context = {
+        'adress' : adress,
+    }
+    return render(request, 'contacts.html', context)
 
 
 def delete_card(request, card_id):

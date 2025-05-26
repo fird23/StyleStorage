@@ -3,7 +3,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import TemplateView
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.generic.base import RedirectView
+from django.contrib.sitemaps.views import sitemap
+from main.sitemap import ReviewSitemap, StaticSitemap
 
+
+
+sitemaps = {
+    'reviews': ReviewSitemap,
+    'static': StaticSitemap,
+}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,9 +37,11 @@ urlpatterns = [
     path('product/<int:product_id>/modal/', views.product_modal, name='product_modal'),
     path('articles/<slug:slug>/', views.article_detail, name='article_detail'),
     path('order_detail/', views.OrderDetailView.as_view(), name='order_detail'),
-    path('', views.home, name='home'),
     path('reviews/', views.all_reviews, name='all_reviews'),
     path('reviews/manage/', views.manage_review, name='manage_review'),
+    path("robots.txt", RedirectView.as_view(url=staticfiles_storage.url("robots.txt"))),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+
 ]
 
 if settings.DEBUG:

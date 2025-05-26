@@ -50,6 +50,7 @@
                 </div>
             </article>
             {% endfor %}
+            
         </div>
         <div class="catalog-button-container">
             <a href="{% url 'catalog' %}" class="cta-btn">Перейти в каталог</a>
@@ -101,7 +102,7 @@
                         placeholder="Напишите ваш отзыв"></textarea>
                 </div>
                 {% if user.is_authenticated %}
-                <button type="submit" class="btn btn-secondary">Отправить</button>
+                <button type="submit">Отправить</button>
                 {% else %}
                 <p class="disabled_form">
                     Для добавления отзыва <a href="{% url 'login' %}?next={{ request.path }}">войдите</a>

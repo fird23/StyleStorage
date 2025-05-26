@@ -1,5 +1,5 @@
 from django.contrib import admin
-from main.models import Product, Order, Article, Material, Contacts, Review
+from main.models import Product, Order, Article, Material, Contacts, Review, CustomUser, PaymentCard
 from django.utils.html import format_html
 from django import forms
 
@@ -83,3 +83,10 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('user', 'text', 'created_at')
     list_filter = ('user', 'created_at')
     search_fields = ('user', 'created_at')
+
+#@admin.register(CustomUser)
+#class CustomUserAdmin(admin.ModelAdmin):
+#    list_display = ('user', 'email')
+
+admin.site.register(CustomUser)    
+admin.site.register(PaymentCard)   

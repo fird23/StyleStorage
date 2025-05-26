@@ -19,32 +19,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // Форматирование для авторизации
-    const loginInput = document.getElementById('login-input');
-    if (loginInput) {
-        let cleave = null;
-        
-        loginInput.addEventListener('input', function(e) {
-            const value = e.target.value.replace(/\D/g, '');
-            
-            if (/^[789]/.test(value)) {
-                if (!cleave) {
-                    cleave = new Cleave(loginInput, {
-                        phone: true,
-                        phoneRegionCode: 'RU',
-                        prefix: '+7',
-                        delimiter: ' ',
-                        blocks: [2, 3, 3, 2, 2],
-                        numericOnly: true
-                    });
-                }
-            } else {
-                if (cleave) {
-                    cleave.destroy();
-                    cleave = null;
-                }
-            }
-        });
-    }
 });
